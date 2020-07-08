@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.mmall.dao.ProductMapper" >
-  <resultMap id="BaseResultMap" type="com.mmall.pojo.Product" >
+<mapper namespace="com.warest.mall.dao.ProductMapper" >
+  <resultMap id="BaseResultMap" type="com.warest.mall.domain.Product" >
     <constructor >
       <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
       <arg column="category_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
@@ -18,11 +18,11 @@
     </constructor>
   </resultMap>
   <sql id="Base_Column_List" >
-    id, category_id, name, subtitle, main_image, sub_images, detail, price, stock, status, 
+    id, category_id, name, subtitle, main_image, sub_images, detail, price, stock, status,
     create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from mmall_product
     where id = #{id,jdbcType=INTEGER}
@@ -31,19 +31,19 @@
     delete from mmall_product
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.mmall.pojo.Product" >
-    insert into mmall_product (id, category_id, name, 
-      subtitle, main_image, sub_images, 
-      detail, price, stock, 
+  <insert id="insert" parameterType="com.warest.mall.domain.Product" >
+    insert into mmall_product (id, category_id, name,
+      subtitle, main_image, sub_images,
+      detail, price, stock,
       status, create_time, update_time
       )
-    values (#{id,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, 
-      #{subtitle,jdbcType=VARCHAR}, #{mainImage,jdbcType=VARCHAR}, #{subImages,jdbcType=VARCHAR}, 
-      #{detail,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL}, #{stock,jdbcType=INTEGER}, 
+    values (#{id,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR},
+      #{subtitle,jdbcType=VARCHAR}, #{mainImage,jdbcType=VARCHAR}, #{subImages,jdbcType=VARCHAR},
+      #{detail,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL}, #{stock,jdbcType=INTEGER},
       #{status,jdbcType=INTEGER}, now(), now()
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.mmall.pojo.Product" >
+  <insert id="insertSelective" parameterType="com.warest.mall.domain.Product" >
     insert into mmall_product
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -76,12 +76,12 @@
       <if test="status != null" >
         status,
       </if>
-      <if test="createTime != null" >
+      <!--<if test="createTime != null" >-->
         create_time,
-      </if>
-      <if test="updateTime != null" >
+      <!--</if>-->
+      <!--<if test="updateTime != null" >-->
         update_time,
-      </if>
+      <!--</if>-->
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -114,15 +114,15 @@
       <if test="status != null" >
         #{status,jdbcType=INTEGER},
       </if>
-      <if test="createTime != null" >
+      <!--<if test="createTime != null" >-->
         now(),
-      </if>
-      <if test="updateTime != null" >
+      <!--</if>-->
+      <!--<if test="updateTime != null" >-->
         now(),
-      </if>
+      <!--</if>-->
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.mmall.pojo.Product" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.warest.mall.domain.Product" >
     update mmall_product
     <set >
       <if test="categoryId != null" >
@@ -155,13 +155,13 @@
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="updateTime != null" >
+      <!--<if test="updateTime != null" >-->
         update_time = now(),
-      </if>
+      <!--</if>-->
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.mmall.pojo.Product" >
+  <update id="updateByPrimaryKey" parameterType="com.warest.mall.domain.Product" >
     update mmall_product
     set category_id = #{categoryId,jdbcType=INTEGER},
       name = #{name,jdbcType=VARCHAR},
@@ -176,44 +176,4 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
-
-
-  <select id="selectList" resultMap="BaseResultMap" >
-    SELECT
-    <include refid="Base_Column_List"/>
-    from mmall_product
-    ORDER BY id asc
-  </select>
-
-
-  <select id="selectByNameAndProductId" resultMap="BaseResultMap" parameterType="map">
-    SELECT
-    <include refid="Base_Column_List"/>
-    from mmall_product
-    <where>
-      <if test="productName != null">
-        and name like #{productName}
-      </if>
-      <if test="productId != null">
-        and id = #{productId}
-      </if>
-    </where>
-  </select>
-  
-  <select id="selectByNameAndCategoryIds" resultMap="BaseResultMap" parameterType="map">
-    SELECT
-    <include refid="Base_Column_List"></include>
-    from mmall_product
-    where status = 1
-    <if test="productName != null">
-      and name like #{productName}
-    </if>
-    <if test="categoryIdList != null" >
-      and category_id in
-      <foreach item="item" index="index" open="(" separator="," close=")" collection="categoryIdList">
-        #{item}
-      </foreach>
-    </if>
-  </select>
-
 </mapper>

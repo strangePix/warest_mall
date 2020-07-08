@@ -6,6 +6,7 @@
 
     <display-name>Archetype Created Web Application</display-name>
 
+    <!--字符转码过滤器-->
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -24,31 +25,37 @@
     </filter-mapping>
 
 
+    <!--监听器监听容器启动关闭-->
     <listener>
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
+    <!--web与spring整合监听器，指定配置文件-->
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:applicationContext.xml
+            classpath*:applicationContext.xml
         </param-value>
     </context-param>
 
+    <!--springmvc配置-->
     <servlet>
         <servlet-name>dispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!--不配这个的话,默认配置文件在WEB-INF/dispatcher-servlet.xml-->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:springMVC.xml</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
-
-
     <servlet-mapping>
         <servlet-name>dispatcher</servlet-name>
-        <url-pattern>*.do</url-pattern>
+        <!--<url-pattern>*.do</url-pattern>-->
+        <url-pattern>/</url-pattern>
     </servlet-mapping>
 
 </web-app>

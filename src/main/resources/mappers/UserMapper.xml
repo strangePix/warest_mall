@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.mmall.dao.UserMapper" >
-  <resultMap id="BaseResultMap" type="com.mmall.pojo.User" >
+<mapper namespace="com.warest.mall.dao.UserMapper" >
+  <resultMap id="BaseResultMap" type="com.warest.mall.domain.User" >
     <constructor >
       <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
       <arg column="username" jdbcType="VARCHAR" javaType="java.lang.String" />
@@ -19,7 +19,7 @@
     id, username, password, email, phone, question, answer, role, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from mmall_user
     where id = #{id,jdbcType=INTEGER}
@@ -28,17 +28,17 @@
     delete from mmall_user
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.mmall.pojo.User" >
-    insert into mmall_user (id, username, password, 
-      email, phone, question, 
-      answer, role, create_time, 
+  <insert id="insert" parameterType="com.warest.mall.domain.User" >
+    insert into mmall_user (id, username, password,
+      email, phone, question,
+      answer, role, create_time,
       update_time)
-    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
-      #{email,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{question,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+      #{email,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{question,jdbcType=VARCHAR},
       #{answer,jdbcType=VARCHAR}, #{role,jdbcType=INTEGER}, now(),
       now())
   </insert>
-  <insert id="insertSelective" parameterType="com.mmall.pojo.User" >
+  <insert id="insertSelective" parameterType="com.warest.mall.domain.User" >
     insert into mmall_user
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -65,12 +65,12 @@
       <if test="role != null" >
         role,
       </if>
-      <if test="createTime != null" >
+      <!--<if test="createTime != null" >-->
         create_time,
-      </if>
-      <if test="updateTime != null" >
+      <!--</if>-->
+      <!--<if test="updateTime != null" >-->
         update_time,
-      </if>
+      <!--</if>-->
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -97,15 +97,15 @@
       <if test="role != null" >
         #{role,jdbcType=INTEGER},
       </if>
-      <if test="createTime != null" >
+      <!--<if test="createTime != null" >-->
         now(),
-      </if>
-      <if test="updateTime != null" >
+      <!--</if>-->
+      <!--<if test="updateTime != null" >-->
         now(),
-      </if>
+      <!--</if>-->
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.mmall.pojo.User" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.warest.mall.domain.User" >
     update mmall_user
     <set >
       <if test="username != null" >
@@ -132,13 +132,13 @@
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="updateTime != null" >
+      <!--<if test="updateTime != null" >-->
         update_time = now(),
-      </if>
+      <!--</if>-->
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.mmall.pojo.User" >
+  <update id="updateByPrimaryKey" parameterType="com.warest.mall.domain.User" >
     update mmall_user
     set username = #{username,jdbcType=VARCHAR},
       password = #{password,jdbcType=VARCHAR},
@@ -151,68 +151,4 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
-  
-  
-  <select id="checkUsername" resultType="int" parameterType="string" >
-    select count(1) from mmall_user
-    where username = #{username}
-  </select>
-
-  <select id="checkEmail" resultType="int" parameterType="string" >
-    select count(1) from mmall_user
-    where email = #{email}
-  </select>
-
-
-  <select id="selectLogin" resultMap="BaseResultMap" parameterType="map">
-    SELECT
---     *???//这样真的好么?答案就是,这样不好.
-    <include refid="Base_Column_List" />
-    from mmall_user
-    where username = #{username}
-    and password = #{password}
-  </select>
-
-
-  <select id="selectQuestionByUsername" resultType="string" parameterType="string">
-    select
-    question
-    from mmall_user
-    where username = #{username}
-  </select>
-
-  <select id="checkAnswer" resultType="int" parameterType="map">
-    SELECT
-    count(1)
-    from mmall_user
-    where username=#{username}
-    and question = #{question}
-    and answer = #{answer}
-  </select>
-
-  <update id="updatePasswordByUsername" parameterType="map">
-    update mmall_user
-    SET password = #{passwordNew},update_time = now()
-    where username = #{username}
-  </update>
-
-  <select id="checkPassword" resultType="int" parameterType="map">
-    SELECT
-    count(1)
-    from mmall_user
-    where password = #{password}
-    and id = #{userId}
-  </select>
-
-
-  <select id="checkEmailByUserId" resultType="int" parameterType="map">
-    select count(1) from mmall_user
-    where email = #{email}
-    and id != #{userId}
-  </select>
-
-
-
-
-
 </mapper>
