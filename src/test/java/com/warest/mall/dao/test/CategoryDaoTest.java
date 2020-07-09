@@ -1,5 +1,7 @@
 package com.warest.mall.dao.test;
 
+import com.warest.mall.dao.CategoryMapper;
+import com.warest.mall.domain.Category;
 import com.warest.mall.service.impl.CategoryServiceImpl;
 import com.warest.mall.test.TestBase;
 import org.junit.Ignore;

@@ -1,6 +1,10 @@
 package com.warest.mall.dao;
 
+
+
 import com.warest.mall.domain.Category;
+
+import java.util.List;
 
 public interface CategoryMapper {
     int deleteByPrimaryKey(Integer id);
@@ -14,4 +18,6 @@ public interface CategoryMapper {
     int updateByPrimaryKeySelective(Category record);
 
     int updateByPrimaryKey(Category record);
+
+    List<Category> selectCategoryChildrenByParentId(Integer parentId);
 }

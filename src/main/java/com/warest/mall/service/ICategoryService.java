@@ -1,6 +1,6 @@
 package com.warest.mall.service;
 
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.Category;
 
 import java.util.List;
@@ -9,9 +9,9 @@ import java.util.List;
  * Created by geely
  */
 public interface ICategoryService {
-    ServerResponse addCategory(String categoryName, Integer parentId);
-    ServerResponse updateCategoryName(Integer categoryId,String categoryName);
-    ServerResponse<List<Category>> getChildrenParallelCategory(Integer categoryId);
-    ServerResponse<List<Integer>> selectCategoryAndChildrenById(Integer categoryId);
+    ResponseEntity addCategory(String categoryName, Integer parentId);
+    ResponseEntity updateCategoryName(Integer categoryId, String categoryName);
+    ResponseEntity<List<Category>> getChildrenParallelCategory(Integer categoryId);
+    ResponseEntity<List<Integer>> selectCategoryAndChildrenById(Integer categoryId);
 
 }

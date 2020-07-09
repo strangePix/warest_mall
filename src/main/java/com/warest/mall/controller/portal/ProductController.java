@@ -1,7 +1,7 @@
 package com.warest.mall.controller.portal;
 
 import com.github.pagehelper.PageInfo;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.service.IProductService;
 import com.warest.mall.vo.ProductDetailVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +25,13 @@ public class ProductController {
 
     @RequestMapping("detail.do")
     @ResponseBody
-    public ServerResponse<ProductDetailVo> detail(Integer productId){
+    public ResponseEntity<ProductDetailVo> detail(Integer productId){
         return iProductService.getProductDetail(productId);
     }
 
     @RequestMapping("list.do")
     @ResponseBody
-    public ServerResponse<PageInfo> list(@RequestParam(value = "keyword",required = false)String keyword,
+    public ResponseEntity<PageInfo> list(@RequestParam(value = "keyword",required = false)String keyword,
                                          @RequestParam(value = "categoryId",required = false)Integer categoryId,
                                          @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                          @RequestParam(value = "pageSize",defaultValue = "10") int pageSize,

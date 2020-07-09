@@ -1,7 +1,7 @@
 package com.warest.mall.controller.backend;
 
 import com.warest.mall.common.Const;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.User;
 import com.warest.mall.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ public class UserManageController {
 
     @RequestMapping(value="login.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<User> login(String username, String password, HttpSession session){
-        ServerResponse<User> response = iUserService.login(username,password);
+    public ResponseEntity<User> login(String username, String password, HttpSession session){
+        ResponseEntity<User> response = iUserService.login(username,password);
         if(response.isSuccess()){
             User user = response.getData();
             if(user.getRole() == Const.Role.ROLE_ADMIN){
@@ -34,7 +34,7 @@ public class UserManageController {
                 session.setAttribute(Const.CURRENT_USER,user);
                 return response;
             }else{
-                return ServerResponse.createByErrorMessage("不是管理员,无法登录");
+                return ResponseEntity.createByErrorMessage("不是管理员,无法登录");
             }
         }
         return response;

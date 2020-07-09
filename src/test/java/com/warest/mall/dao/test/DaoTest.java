@@ -1,5 +1,7 @@
 package com.warest.mall.dao.test;
 
+import com.warest.mall.dao.UserMapper;
+import com.warest.mall.domain.User;
 import com.warest.mall.test.TestBase;
 import org.junit.Ignore;
 import org.junit.Test;

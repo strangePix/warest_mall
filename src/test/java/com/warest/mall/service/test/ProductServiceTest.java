@@ -2,7 +2,7 @@ package com.warest.mall.service.test;
 
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.service.IProductService;
 import com.warest.mall.test.TestBase;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class ProductServiceTest extends TestBase {
 
     @Test
     public void testIProductService(){
-        ServerResponse<PageInfo> result =  iProductService.getProductByKeywordCategory("iphone",2,1,5,"price_desc");
+        ResponseEntity<PageInfo> result =  iProductService.getProductByKeywordCategory("iphone",2,1,5,"price_desc");
         System.out.println(result);
     }
 

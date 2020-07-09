@@ -1,5 +1,6 @@
 package com.warest.mall.dao;
 
+
 import com.warest.mall.domain.PayInfo;
 
 public interface PayInfoMapper {

@@ -97,7 +97,7 @@
     <!--配置mapper-->
     <bean name="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <!--会话工厂名-->
-        <property name="sqlSessionFactoryBeanName" value="sessionFactory"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
         <!--接口包名-->
         <property name="basePackage" value="com.warest.mall.dao"/>
     </bean>

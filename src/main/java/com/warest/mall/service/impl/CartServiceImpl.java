@@ -4,10 +4,11 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.warest.mall.common.Const;
 import com.warest.mall.common.ResponseCode;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.dao.CartMapper;
 import com.warest.mall.dao.ProductMapper;
 import com.warest.mall.domain.Cart;
+import com.warest.mall.domain.Product;
 import com.warest.mall.service.ICartService;
 import com.warest.mall.util.BigDecimalUtil;
 import com.warest.mall.util.PropertiesUtil;
@@ -31,9 +32,9 @@ public class CartServiceImpl implements ICartService {
     @Autowired
     private ProductMapper productMapper;
 
-    public ServerResponse<CartVo> add(Integer userId,Integer productId,Integer count){
+    public ResponseEntity<CartVo> add(Integer userId, Integer productId, Integer count){
         if(productId == null || count == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
 
 
@@ -56,9 +57,9 @@ public class CartServiceImpl implements ICartService {
         return this.list(userId);
     }
 
-    public ServerResponse<CartVo> update(Integer userId,Integer productId,Integer count){
+    public ResponseEntity<CartVo> update(Integer userId, Integer productId, Integer count){
         if(productId == null || count == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         Cart cart = cartMapper.selectCartByUserIdProductId(userId,productId);
         if(cart != null){
@@ -68,33 +69,33 @@ public class CartServiceImpl implements ICartService {
         return this.list(userId);
     }
 
-    public ServerResponse<CartVo> deleteProduct(Integer userId,String productIds){
+    public ResponseEntity<CartVo> deleteProduct(Integer userId, String productIds){
         List<String> productList = Splitter.on(",").splitToList(productIds);
         if(CollectionUtils.isEmpty(productList)){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         cartMapper.deleteByUserIdProductIds(userId,productList);
         return this.list(userId);
     }
 
 
-    public ServerResponse<CartVo> list (Integer userId){
+    public ResponseEntity<CartVo> list (Integer userId){
         CartVo cartVo = this.getCartVoLimit(userId);
-        return ServerResponse.createBySuccess(cartVo);
+        return ResponseEntity.createBySuccess(cartVo);
     }
 
 
 
-    public ServerResponse<CartVo> selectOrUnSelect (Integer userId,Integer productId,Integer checked){
+    public ResponseEntity<CartVo> selectOrUnSelect (Integer userId, Integer productId, Integer checked){
         cartMapper.checkedOrUncheckedProduct(userId,productId,checked);
         return this.list(userId);
     }
 
-    public ServerResponse<Integer> getCartProductCount(Integer userId){
+    public ResponseEntity<Integer> getCartProductCount(Integer userId){
         if(userId == null){
-            return ServerResponse.createBySuccess(0);
+            return ResponseEntity.createBySuccess(0);
         }
-        return ServerResponse.createBySuccess(cartMapper.selectCartProductCount(userId));
+        return ResponseEntity.createBySuccess(cartMapper.selectCartProductCount(userId));
     }
 
 

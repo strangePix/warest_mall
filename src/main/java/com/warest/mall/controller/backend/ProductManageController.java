@@ -3,7 +3,7 @@ package com.warest.mall.controller.backend;
 import com.google.common.collect.Maps;
 import com.warest.mall.common.Const;
 import com.warest.mall.common.ResponseCode;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.Product;
 import com.warest.mall.domain.User;
 import com.warest.mall.service.IFileService;
@@ -40,41 +40,41 @@ public class ProductManageController {
 
     @RequestMapping("save.do")
     @ResponseBody
-    public ServerResponse productSave(HttpSession session, Product product){
+    public ResponseEntity productSave(HttpSession session, Product product){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
 
         }
         if(iUserService.checkAdminRole(user).isSuccess()){
             //填充我们增加产品的业务逻辑
             return iProductService.saveOrUpdateProduct(product);
         }else{
-            return ServerResponse.createByErrorMessage("无权限操作");
+            return ResponseEntity.createByErrorMessage("无权限操作");
         }
     }
 
     @RequestMapping("set_sale_status.do")
     @ResponseBody
-    public ServerResponse setSaleStatus(HttpSession session, Integer productId,Integer status){
+    public ResponseEntity setSaleStatus(HttpSession session, Integer productId, Integer status){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
 
         }
         if(iUserService.checkAdminRole(user).isSuccess()){
             return iProductService.setSaleStatus(productId,status);
         }else{
-            return ServerResponse.createByErrorMessage("无权限操作");
+            return ResponseEntity.createByErrorMessage("无权限操作");
         }
     }
 
     @RequestMapping("detail.do")
     @ResponseBody
-    public ServerResponse getDetail(HttpSession session, Integer productId){
+    public ResponseEntity getDetail(HttpSession session, Integer productId){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
 
         }
         if(iUserService.checkAdminRole(user).isSuccess()){
@@ -82,48 +82,48 @@ public class ProductManageController {
             return iProductService.manageProductDetail(productId);
 
         }else{
-            return ServerResponse.createByErrorMessage("无权限操作");
+            return ResponseEntity.createByErrorMessage("无权限操作");
         }
     }
 
     @RequestMapping("list.do")
     @ResponseBody
-    public ServerResponse getList(HttpSession session, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,@RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
+    public ResponseEntity getList(HttpSession session, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum, @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
 
         }
         if(iUserService.checkAdminRole(user).isSuccess()){
             //填充业务
             return iProductService.getProductList(pageNum,pageSize);
         }else{
-            return ServerResponse.createByErrorMessage("无权限操作");
+            return ResponseEntity.createByErrorMessage("无权限操作");
         }
     }
 
     @RequestMapping("search.do")
     @ResponseBody
-    public ServerResponse productSearch(HttpSession session,String productName,Integer productId, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,@RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
+    public ResponseEntity productSearch(HttpSession session, String productName, Integer productId, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum, @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
 
         }
         if(iUserService.checkAdminRole(user).isSuccess()){
             //填充业务
             return iProductService.searchProduct(productName,productId,pageNum,pageSize);
         }else{
-            return ServerResponse.createByErrorMessage("无权限操作");
+            return ResponseEntity.createByErrorMessage("无权限操作");
         }
     }
 
     @RequestMapping("upload.do")
     @ResponseBody
-    public ServerResponse upload(HttpSession session,@RequestParam(value = "upload_file",required = false) MultipartFile file,HttpServletRequest request){
+    public ResponseEntity upload(HttpSession session, @RequestParam(value = "upload_file",required = false) MultipartFile file, HttpServletRequest request){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录管理员");
         }
         if(iUserService.checkAdminRole(user).isSuccess()){
             String path = request.getSession().getServletContext().getRealPath("upload");
@@ -133,9 +133,9 @@ public class ProductManageController {
             Map fileMap = Maps.newHashMap();
             fileMap.put("uri",targetFileName);
             fileMap.put("url",url);
-            return ServerResponse.createBySuccess(fileMap);
+            return ResponseEntity.createBySuccess(fileMap);
         }else{
-            return ServerResponse.createByErrorMessage("无权限操作");
+            return ResponseEntity.createByErrorMessage("无权限操作");
         }
     }
 

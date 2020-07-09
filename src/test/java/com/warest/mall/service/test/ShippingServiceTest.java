@@ -1,7 +1,8 @@
 package com.warest.mall.service.test;
 
 import com.github.pagehelper.PageInfo;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
+import com.warest.mall.domain.Shipping;
 import com.warest.mall.service.impl.ShippingServiceImpl;
 import com.warest.mall.test.TestBase;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -25,7 +26,7 @@ public class ShippingServiceTest extends TestBase {
 
     @Test
     public void testSelect(){
-        ServerResponse sr = iShippingService.select(1, 3);
+        ResponseEntity sr = iShippingService.select(1, 3);
         Shipping shipping = (Shipping)sr.getData();
         logger.info(ToStringBuilder.reflectionToString(shipping));
 
@@ -33,12 +34,12 @@ public class ShippingServiceTest extends TestBase {
 
     @Test
     public void testList(){
-        ServerResponse sr = iShippingService.list(1,1,2);
+        ResponseEntity sr = iShippingService.list(1,1,2);
         PageInfo<Shipping> p=new PageInfo<Shipping>((List<Shipping>)sr.getData());
         logger.info(ToStringBuilder.reflectionToString(sr.getData()));
         logger.info("======");
 
-        ServerResponse x = ServerResponse.createBySuccess(p);
+        ResponseEntity x = ResponseEntity.createBySuccess(p);
         logger.info(ToStringBuilder.reflectionToString(x));
 
 //        {

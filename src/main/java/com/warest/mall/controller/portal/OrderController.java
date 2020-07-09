@@ -6,7 +6,7 @@ import com.alipay.demo.trade.config.Configs;
 import com.google.common.collect.Maps;
 import com.warest.mall.common.Const;
 import com.warest.mall.common.ResponseCode;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.User;
 import com.warest.mall.service.IOrderService;
 import org.slf4j.Logger;
@@ -38,10 +38,10 @@ public class OrderController {
 
     @RequestMapping("create.do")
     @ResponseBody
-    public ServerResponse create(HttpSession session, Integer shippingId){
+    public ResponseEntity create(HttpSession session, Integer shippingId){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
         return iOrderService.createOrder(user.getId(),shippingId);
     }
@@ -49,10 +49,10 @@ public class OrderController {
 
     @RequestMapping("cancel.do")
     @ResponseBody
-    public ServerResponse cancel(HttpSession session, Long orderNo){
+    public ResponseEntity cancel(HttpSession session, Long orderNo){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
         return iOrderService.cancel(user.getId(),orderNo);
     }
@@ -60,10 +60,10 @@ public class OrderController {
 
     @RequestMapping("get_order_cart_product.do")
     @ResponseBody
-    public ServerResponse getOrderCartProduct(HttpSession session){
+    public ResponseEntity getOrderCartProduct(HttpSession session){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
         return iOrderService.getOrderCartProduct(user.getId());
     }
@@ -72,20 +72,20 @@ public class OrderController {
 
     @RequestMapping("detail.do")
     @ResponseBody
-    public ServerResponse detail(HttpSession session,Long orderNo){
+    public ResponseEntity detail(HttpSession session, Long orderNo){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
         return iOrderService.getOrderDetail(user.getId(),orderNo);
     }
 
     @RequestMapping("list.do")
     @ResponseBody
-    public ServerResponse list(HttpSession session, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum, @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
+    public ResponseEntity list(HttpSession session, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum, @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
         return iOrderService.getOrderList(user.getId(),pageNum,pageSize);
     }
@@ -115,10 +115,10 @@ public class OrderController {
 
     @RequestMapping("pay.do")
     @ResponseBody
-    public ServerResponse pay(HttpSession session, Long orderNo, HttpServletRequest request){
+    public ResponseEntity pay(HttpSession session, Long orderNo, HttpServletRequest request){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
         String path = request.getSession().getServletContext().getRealPath("upload");
         return iOrderService.pay(orderNo,user.getId(),path);
@@ -149,7 +149,7 @@ public class OrderController {
             boolean alipayRSACheckedV2 = AlipaySignature.rsaCheckV2(params, Configs.getAlipayPublicKey(),"utf-8",Configs.getSignType());
 
             if(!alipayRSACheckedV2){
-                return ServerResponse.createByErrorMessage("非法请求,验证不通过,再恶意请求我就报警找网警了");
+                return ResponseEntity.createByErrorMessage("非法请求,验证不通过,再恶意请求我就报警找网警了");
             }
         } catch (AlipayApiException e) {
             logger.error("支付宝验证回调异常",e);
@@ -159,7 +159,7 @@ public class OrderController {
 
 
         //
-        ServerResponse serverResponse = iOrderService.aliCallback(params);
+        ResponseEntity serverResponse = iOrderService.aliCallback(params);
         if(serverResponse.isSuccess()){
             return Const.AlipayCallback.RESPONSE_SUCCESS;
         }
@@ -169,17 +169,17 @@ public class OrderController {
 
     @RequestMapping("query_order_pay_status.do")
     @ResponseBody
-    public ServerResponse<Boolean> queryOrderPayStatus(HttpSession session, Long orderNo){
+    public ResponseEntity<Boolean> queryOrderPayStatus(HttpSession session, Long orderNo){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
 
-        ServerResponse serverResponse = iOrderService.queryOrderPayStatus(user.getId(),orderNo);
+        ResponseEntity serverResponse = iOrderService.queryOrderPayStatus(user.getId(),orderNo);
         if(serverResponse.isSuccess()){
-            return ServerResponse.createBySuccess(true);
+            return ResponseEntity.createBySuccess(true);
         }
-        return ServerResponse.createBySuccess(false);
+        return ResponseEntity.createBySuccess(false);
     }
 
 

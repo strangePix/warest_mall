@@ -5,7 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.warest.mall.common.Const;
 import com.warest.mall.common.ResponseCode;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.dao.CategoryMapper;
 import com.warest.mall.dao.ProductMapper;
 import com.warest.mall.domain.Category;
@@ -39,7 +39,7 @@ public class ProductServiceImpl implements IProductService {
     @Autowired
     private ICategoryService iCategoryService;
 
-    public ServerResponse saveOrUpdateProduct(Product product){
+    public ResponseEntity saveOrUpdateProduct(Product product){
         if(product != null)
         {
             if(StringUtils.isNotBlank(product.getSubImages())){
@@ -52,46 +52,46 @@ public class ProductServiceImpl implements IProductService {
             if(product.getId() != null){
                 int rowCount = productMapper.updateByPrimaryKey(product);
                 if(rowCount > 0){
-                    return ServerResponse.createBySuccess("更新产品成功");
+                    return ResponseEntity.createBySuccess("更新产品成功");
                 }
-                return ServerResponse.createBySuccess("更新产品失败");
+                return ResponseEntity.createBySuccess("更新产品失败");
             }else{
                 int rowCount = productMapper.insert(product);
                 if(rowCount > 0){
-                    return ServerResponse.createBySuccess("新增产品成功");
+                    return ResponseEntity.createBySuccess("新增产品成功");
                 }
-                return ServerResponse.createBySuccess("新增产品失败");
+                return ResponseEntity.createBySuccess("新增产品失败");
             }
         }
-        return ServerResponse.createByErrorMessage("新增或更新产品参数不正确");
+        return ResponseEntity.createByErrorMessage("新增或更新产品参数不正确");
     }
 
 
-    public ServerResponse<String> setSaleStatus(Integer productId,Integer status){
+    public ResponseEntity<String> setSaleStatus(Integer productId, Integer status){
         if(productId == null || status == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         Product product = new Product();
         product.setId(productId);
         product.setStatus(status);
         int rowCount = productMapper.updateByPrimaryKeySelective(product);
         if(rowCount > 0){
-            return ServerResponse.createBySuccess("修改产品销售状态成功");
+            return ResponseEntity.createBySuccess("修改产品销售状态成功");
         }
-        return ServerResponse.createByErrorMessage("修改产品销售状态失败");
+        return ResponseEntity.createByErrorMessage("修改产品销售状态失败");
     }
 
 
-    public ServerResponse<ProductDetailVo> manageProductDetail(Integer productId){
+    public ResponseEntity<ProductDetailVo> manageProductDetail(Integer productId){
         if(productId == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         Product product = productMapper.selectByPrimaryKey(productId);
         if(product == null){
-            return ServerResponse.createByErrorMessage("产品已下架或者删除");
+            return ResponseEntity.createByErrorMessage("产品已下架或者删除");
         }
         ProductDetailVo productDetailVo = assembleProductDetailVo(product);
-        return ServerResponse.createBySuccess(productDetailVo);
+        return ResponseEntity.createBySuccess(productDetailVo);
     }
 
     private ProductDetailVo assembleProductDetailVo(Product product){
@@ -123,7 +123,7 @@ public class ProductServiceImpl implements IProductService {
 
 
 
-    public ServerResponse<PageInfo> getProductList(int pageNum,int pageSize){
+    public ResponseEntity<PageInfo> getProductList(int pageNum, int pageSize){
         //startPage--start
         //填充自己的sql查询逻辑
         //pageHelper-收尾
@@ -137,7 +137,7 @@ public class ProductServiceImpl implements IProductService {
         }
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(productListVoList);
-        return ServerResponse.createBySuccess(pageResult);
+        return ResponseEntity.createBySuccess(pageResult);
     }
 
     private ProductListVo assembleProductListVo(Product product){
@@ -155,7 +155,7 @@ public class ProductServiceImpl implements IProductService {
 
 
 
-    public ServerResponse<PageInfo> searchProduct(String productName,Integer productId,int pageNum,int pageSize){
+    public ResponseEntity<PageInfo> searchProduct(String productName, Integer productId, int pageNum, int pageSize){
         PageHelper.startPage(pageNum,pageSize);
         if(StringUtils.isNotBlank(productName)){
             productName = new StringBuilder().append("%").append(productName).append("%").toString();
@@ -168,29 +168,29 @@ public class ProductServiceImpl implements IProductService {
         }
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(productListVoList);
-        return ServerResponse.createBySuccess(pageResult);
+        return ResponseEntity.createBySuccess(pageResult);
     }
 
 
-    public ServerResponse<ProductDetailVo> getProductDetail(Integer productId){
+    public ResponseEntity<ProductDetailVo> getProductDetail(Integer productId){
         if(productId == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         Product product = productMapper.selectByPrimaryKey(productId);
         if(product == null){
-            return ServerResponse.createByErrorMessage("产品已下架或者删除");
+            return ResponseEntity.createByErrorMessage("产品已下架或者删除");
         }
         if(product.getStatus() != Const.ProductStatusEnum.ON_SALE.getCode()){
-            return ServerResponse.createByErrorMessage("产品已下架或者删除");
+            return ResponseEntity.createByErrorMessage("产品已下架或者删除");
         }
         ProductDetailVo productDetailVo = assembleProductDetailVo(product);
-        return ServerResponse.createBySuccess(productDetailVo);
+        return ResponseEntity.createBySuccess(productDetailVo);
     }
 
 
-    public ServerResponse<PageInfo> getProductByKeywordCategory(String keyword,Integer categoryId,int pageNum,int pageSize,String orderBy){
+    public ResponseEntity<PageInfo> getProductByKeywordCategory(String keyword, Integer categoryId, int pageNum, int pageSize, String orderBy){
         if(StringUtils.isBlank(keyword) && categoryId == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
         List<Integer> categoryIdList = new ArrayList<Integer>();
 
@@ -201,7 +201,7 @@ public class ProductServiceImpl implements IProductService {
                 PageHelper.startPage(pageNum,pageSize);
                 List<ProductListVo> productListVoList = Lists.newArrayList();
                 PageInfo pageInfo = new PageInfo(productListVoList);
-                return ServerResponse.createBySuccess(pageInfo);
+                return ResponseEntity.createBySuccess(pageInfo);
             }
             categoryIdList = iCategoryService.selectCategoryAndChildrenById(category.getId()).getData();
         }
@@ -227,7 +227,7 @@ public class ProductServiceImpl implements IProductService {
 
         PageInfo pageInfo = new PageInfo(productList);
         pageInfo.setList(productListVoList);
-        return ServerResponse.createBySuccess(pageInfo);
+        return ResponseEntity.createBySuccess(pageInfo);
     }
 
 

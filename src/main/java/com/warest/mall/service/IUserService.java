@@ -1,6 +1,6 @@
 package com.warest.mall.service;
 
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.User;
 
 /**
@@ -8,23 +8,23 @@ import com.warest.mall.domain.User;
  */
 public interface IUserService {
 
-    ServerResponse<User> login(String username, String password);
+    ResponseEntity<User> login(String username, String password);
 
-    ServerResponse<String> register(User user);
+    ResponseEntity<String> register(User user);
 
-    ServerResponse<String> checkValid(String str,String type);
+    ResponseEntity<String> checkValid(String str, String type);
 
-    ServerResponse selectQuestion(String username);
+    ResponseEntity selectQuestion(String username);
 
-    ServerResponse<String> checkAnswer(String username,String question,String answer);
+    ResponseEntity<String> checkAnswer(String username, String question, String answer);
 
-    ServerResponse<String> forgetResetPassword(String username,String passwordNew,String forgetToken);
+    ResponseEntity<String> forgetResetPassword(String username, String passwordNew, String forgetToken);
 
-    ServerResponse<String> resetPassword(String passwordOld,String passwordNew,User user);
+    ResponseEntity<String> resetPassword(String passwordOld, String passwordNew, User user);
 
-    ServerResponse<User> updateInformation(User user);
+    ResponseEntity<User> updateInformation(User user);
 
-    ServerResponse<User> getInformation(Integer userId);
+    ResponseEntity<User> getInformation(Integer userId);
 
-    ServerResponse checkAdminRole(User user);
+    ResponseEntity checkAdminRole(User user);
 }

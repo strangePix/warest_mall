@@ -15,7 +15,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.warest.mall.common.Const;
-import com.warest.mall.common.ServerResponse;
+import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.dao.*;
 import com.warest.mall.domain.*;
 import com.warest.mall.service.IOrderService;
@@ -80,13 +80,13 @@ public class OrderServiceImpl implements IOrderService {
     private ShippingMapper shippingMapper;
 
 
-    public  ServerResponse createOrder(Integer userId,Integer shippingId){
+    public ResponseEntity createOrder(Integer userId, Integer shippingId){
 
         //从购物车中获取数据
         List<Cart> cartList = cartMapper.selectCheckedCartByUserId(userId);
 
         //计算这个订单的总价
-        ServerResponse serverResponse = this.getCartOrderItem(userId,cartList);
+        ResponseEntity serverResponse = this.getCartOrderItem(userId,cartList);
         if(!serverResponse.isSuccess()){
             return serverResponse;
         }
@@ -97,10 +97,10 @@ public class OrderServiceImpl implements IOrderService {
         //生成订单
         Order order = this.assembleOrder(userId,shippingId,payment);
         if(order == null){
-            return ServerResponse.createByErrorMessage("生成订单错误");
+            return ResponseEntity.createByErrorMessage("生成订单错误");
         }
         if(CollectionUtils.isEmpty(orderItemList)){
-            return ServerResponse.createByErrorMessage("购物车为空");
+            return ResponseEntity.createByErrorMessage("购物车为空");
         }
         for(OrderItem orderItem : orderItemList){
             orderItem.setOrderNo(order.getOrderNo());
@@ -116,7 +116,7 @@ public class OrderServiceImpl implements IOrderService {
         //返回给前端数据
 
         OrderVo orderVo = assembleOrderVo(order,orderItemList);
-        return ServerResponse.createBySuccess(orderVo);
+        return ResponseEntity.createBySuccess(orderVo);
     }
 
 
@@ -242,10 +242,10 @@ public class OrderServiceImpl implements IOrderService {
         return payment;
     }
 
-    private ServerResponse getCartOrderItem(Integer userId,List<Cart> cartList){
+    private ResponseEntity getCartOrderItem(Integer userId, List<Cart> cartList){
         List<OrderItem> orderItemList = Lists.newArrayList();
         if(CollectionUtils.isEmpty(cartList)){
-            return ServerResponse.createByErrorMessage("购物车为空");
+            return ResponseEntity.createByErrorMessage("购物车为空");
         }
 
         //校验购物车的数据,包括产品的状态和数量
@@ -253,12 +253,12 @@ public class OrderServiceImpl implements IOrderService {
             OrderItem orderItem = new OrderItem();
             Product product = productMapper.selectByPrimaryKey(cartItem.getProductId());
             if(Const.ProductStatusEnum.ON_SALE.getCode() != product.getStatus()){
-                return ServerResponse.createByErrorMessage("产品"+product.getName()+"不是在线售卖状态");
+                return ResponseEntity.createByErrorMessage("产品"+product.getName()+"不是在线售卖状态");
             }
 
             //校验库存
             if(cartItem.getQuantity() > product.getStock()){
-                return ServerResponse.createByErrorMessage("产品"+product.getName()+"库存不足");
+                return ResponseEntity.createByErrorMessage("产品"+product.getName()+"库存不足");
             }
 
             orderItem.setUserId(userId);
@@ -270,20 +270,20 @@ public class OrderServiceImpl implements IOrderService {
             orderItem.setTotalPrice(BigDecimalUtil.mul(product.getPrice().doubleValue(),cartItem.getQuantity()));
             orderItemList.add(orderItem);
         }
-        return ServerResponse.createBySuccess(orderItemList);
+        return ResponseEntity.createBySuccess(orderItemList);
     }
 
 
 
 
 
-    public ServerResponse<String> cancel(Integer userId,Long orderNo){
+    public ResponseEntity<String> cancel(Integer userId, Long orderNo){
         Order order  = orderMapper.selectByUserIdAndOrderNo(userId,orderNo);
         if(order == null){
-            return ServerResponse.createByErrorMessage("该用户此订单不存在");
+            return ResponseEntity.createByErrorMessage("该用户此订单不存在");
         }
         if(order.getStatus() != Const.OrderStatusEnum.NO_PAY.getCode()){
-            return ServerResponse.createByErrorMessage("已付款,无法取消订单");
+            return ResponseEntity.createByErrorMessage("已付款,无法取消订单");
         }
         Order updateOrder = new Order();
         updateOrder.setId(order.getId());
@@ -291,20 +291,20 @@ public class OrderServiceImpl implements IOrderService {
 
         int row = orderMapper.updateByPrimaryKeySelective(updateOrder);
         if(row > 0){
-            return ServerResponse.createBySuccess();
+            return ResponseEntity.createBySuccess();
         }
-        return ServerResponse.createByError();
+        return ResponseEntity.createByError();
     }
 
 
 
 
-    public ServerResponse getOrderCartProduct(Integer userId){
+    public ResponseEntity getOrderCartProduct(Integer userId){
         OrderProductVo orderProductVo = new OrderProductVo();
         //从购物车中获取数据
 
         List<Cart> cartList = cartMapper.selectCheckedCartByUserId(userId);
-        ServerResponse serverResponse =  this.getCartOrderItem(userId,cartList);
+        ResponseEntity serverResponse =  this.getCartOrderItem(userId,cartList);
         if(!serverResponse.isSuccess()){
             return serverResponse;
         }
@@ -320,28 +320,28 @@ public class OrderServiceImpl implements IOrderService {
         orderProductVo.setProductTotalPrice(payment);
         orderProductVo.setOrderItemVoList(orderItemVoList);
         orderProductVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix"));
-        return ServerResponse.createBySuccess(orderProductVo);
+        return ResponseEntity.createBySuccess(orderProductVo);
     }
 
 
-    public ServerResponse<OrderVo> getOrderDetail(Integer userId,Long orderNo){
+    public ResponseEntity<OrderVo> getOrderDetail(Integer userId, Long orderNo){
         Order order = orderMapper.selectByUserIdAndOrderNo(userId,orderNo);
         if(order != null){
             List<OrderItem> orderItemList = orderItemMapper.getByOrderNoUserId(orderNo,userId);
             OrderVo orderVo = assembleOrderVo(order,orderItemList);
-            return ServerResponse.createBySuccess(orderVo);
+            return ResponseEntity.createBySuccess(orderVo);
         }
-        return  ServerResponse.createByErrorMessage("没有找到该订单");
+        return  ResponseEntity.createByErrorMessage("没有找到该订单");
     }
 
 
-    public ServerResponse<PageInfo> getOrderList(Integer userId,int pageNum,int pageSize){
+    public ResponseEntity<PageInfo> getOrderList(Integer userId, int pageNum, int pageSize){
         PageHelper.startPage(pageNum,pageSize);
         List<Order> orderList = orderMapper.selectByUserId(userId);
         List<OrderVo> orderVoList = assembleOrderVoList(orderList,userId);
         PageInfo pageResult = new PageInfo(orderList);
         pageResult.setList(orderVoList);
-        return ServerResponse.createBySuccess(pageResult);
+        return ResponseEntity.createBySuccess(pageResult);
     }
 
 
@@ -382,11 +382,11 @@ public class OrderServiceImpl implements IOrderService {
 
 
 
-    public ServerResponse pay(Long orderNo,Integer userId,String path){
+    public ResponseEntity pay(Long orderNo, Integer userId, String path){
         Map<String ,String> resultMap = Maps.newHashMap();
         Order order = orderMapper.selectByUserIdAndOrderNo(userId,orderNo);
         if(order == null){
-            return ServerResponse.createByErrorMessage("用户没有该订单");
+            return ResponseEntity.createByErrorMessage("用户没有该订单");
         }
         resultMap.put("orderNo",String.valueOf(order.getOrderNo()));
 
@@ -486,18 +486,18 @@ public class OrderServiceImpl implements IOrderService {
                 logger.info("qrPath:" + qrPath);
                 String qrUrl = PropertiesUtil.getProperty("ftp.server.http.prefix")+targetFile.getName();
                 resultMap.put("qrUrl",qrUrl);
-                return ServerResponse.createBySuccess(resultMap);
+                return ResponseEntity.createBySuccess(resultMap);
             case FAILED:
                 logger.error("支付宝预下单失败!!!");
-                return ServerResponse.createByErrorMessage("支付宝预下单失败!!!");
+                return ResponseEntity.createByErrorMessage("支付宝预下单失败!!!");
 
             case UNKNOWN:
                 logger.error("系统异常，预下单状态未知!!!");
-                return ServerResponse.createByErrorMessage("系统异常，预下单状态未知!!!");
+                return ResponseEntity.createByErrorMessage("系统异常，预下单状态未知!!!");
 
             default:
                 logger.error("不支持的交易状态，交易返回异常!!!");
-                return ServerResponse.createByErrorMessage("不支持的交易状态，交易返回异常!!!");
+                return ResponseEntity.createByErrorMessage("不支持的交易状态，交易返回异常!!!");
         }
 
     }
@@ -515,16 +515,16 @@ public class OrderServiceImpl implements IOrderService {
     }
 
 
-    public ServerResponse aliCallback(Map<String,String> params){
+    public ResponseEntity aliCallback(Map<String,String> params){
         Long orderNo = Long.parseLong(params.get("out_trade_no"));
         String tradeNo = params.get("trade_no");
         String tradeStatus = params.get("trade_status");
         Order order = orderMapper.selectByOrderNo(orderNo);
         if(order == null){
-            return ServerResponse.createByErrorMessage("非快乐慕商城的订单,回调忽略");
+            return ResponseEntity.createByErrorMessage("非快乐慕商城的订单,回调忽略");
         }
         if(order.getStatus() >= Const.OrderStatusEnum.PAID.getCode()){
-            return ServerResponse.createBySuccess("支付宝重复调用");
+            return ResponseEntity.createBySuccess("支付宝重复调用");
         }
         if(Const.AlipayCallback.TRADE_STATUS_TRADE_SUCCESS.equals(tradeStatus)){
             order.setPaymentTime(DateTimeUtil.strToDate(params.get("gmt_payment")));
@@ -541,22 +541,22 @@ public class OrderServiceImpl implements IOrderService {
 
         payInfoMapper.insert(payInfo);
 
-        return ServerResponse.createBySuccess();
+        return ResponseEntity.createBySuccess();
     }
 
 
 
 
 
-    public ServerResponse queryOrderPayStatus(Integer userId,Long orderNo){
+    public ResponseEntity queryOrderPayStatus(Integer userId, Long orderNo){
         Order order = orderMapper.selectByUserIdAndOrderNo(userId,orderNo);
         if(order == null){
-            return ServerResponse.createByErrorMessage("用户没有该订单");
+            return ResponseEntity.createByErrorMessage("用户没有该订单");
         }
         if(order.getStatus() >= Const.OrderStatusEnum.PAID.getCode()){
-            return ServerResponse.createBySuccess();
+            return ResponseEntity.createBySuccess();
         }
-        return ServerResponse.createByError();
+        return ResponseEntity.createByError();
     }
 
 
@@ -574,29 +574,29 @@ public class OrderServiceImpl implements IOrderService {
 
     //backend
 
-    public ServerResponse<PageInfo> manageList(int pageNum,int pageSize){
+    public ResponseEntity<PageInfo> manageList(int pageNum, int pageSize){
         PageHelper.startPage(pageNum,pageSize);
         List<Order> orderList = orderMapper.selectAllOrder();
         List<OrderVo> orderVoList = this.assembleOrderVoList(orderList,null);
         PageInfo pageResult = new PageInfo(orderList);
         pageResult.setList(orderVoList);
-        return ServerResponse.createBySuccess(pageResult);
+        return ResponseEntity.createBySuccess(pageResult);
     }
 
 
-    public ServerResponse<OrderVo> manageDetail(Long orderNo){
+    public ResponseEntity<OrderVo> manageDetail(Long orderNo){
         Order order = orderMapper.selectByOrderNo(orderNo);
         if(order != null){
             List<OrderItem> orderItemList = orderItemMapper.getByOrderNo(orderNo);
             OrderVo orderVo = assembleOrderVo(order,orderItemList);
-            return ServerResponse.createBySuccess(orderVo);
+            return ResponseEntity.createBySuccess(orderVo);
         }
-        return ServerResponse.createByErrorMessage("订单不存在");
+        return ResponseEntity.createByErrorMessage("订单不存在");
     }
 
 
 
-    public ServerResponse<PageInfo> manageSearch(Long orderNo,int pageNum,int pageSize){
+    public ResponseEntity<PageInfo> manageSearch(Long orderNo, int pageNum, int pageSize){
         PageHelper.startPage(pageNum,pageSize);
         Order order = orderMapper.selectByOrderNo(orderNo);
         if(order != null){
@@ -605,23 +605,23 @@ public class OrderServiceImpl implements IOrderService {
 
             PageInfo pageResult = new PageInfo(Lists.newArrayList(order));
             pageResult.setList(Lists.newArrayList(orderVo));
-            return ServerResponse.createBySuccess(pageResult);
+            return ResponseEntity.createBySuccess(pageResult);
         }
-        return ServerResponse.createByErrorMessage("订单不存在");
+        return ResponseEntity.createByErrorMessage("订单不存在");
     }
 
 
-    public ServerResponse<String> manageSendGoods(Long orderNo){
+    public ResponseEntity<String> manageSendGoods(Long orderNo){
         Order order= orderMapper.selectByOrderNo(orderNo);
         if(order != null){
             if(order.getStatus() == Const.OrderStatusEnum.PAID.getCode()){
                 order.setStatus(Const.OrderStatusEnum.SHIPPED.getCode());
                 order.setSendTime(new Date());
                 orderMapper.updateByPrimaryKeySelective(order);
-                return ServerResponse.createBySuccess("发货成功");
+                return ResponseEntity.createBySuccess("发货成功");
             }
         }
-        return ServerResponse.createByErrorMessage("订单不存在");
+        return ResponseEntity.createByErrorMessage("订单不存在");
     }
 
 
