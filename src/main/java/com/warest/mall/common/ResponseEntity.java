@@ -12,8 +12,9 @@ import java.io.Serializable;
  * Created by geely
  */
 //@JsonSerialize(include =  JsonSerialize.Inclusion.NON_NULL)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 //保证序列化json的时候,如果是null的属性不会序列化，也就是不会返回给前端键值对
+//但不能忽略对象属性的空属性
 public class ResponseEntity<T> implements Serializable {
 
 //    状态码   1表示失败  0表示成功  get_information有一个10

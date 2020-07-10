@@ -1,8 +1,9 @@
 package com.warest.mall.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class User {
+public class User implements Serializable {
     private Integer id;
 
     private String username;
@@ -23,22 +24,22 @@ public class User {
 
     private Date updateTime;
 
-    public User(Integer id, String username, String password, String email, String phone, String question, String answer, Integer role, Date createTime, Date updateTime) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.phone = phone;
-        this.question = question;
-        this.answer = answer;
-        this.role = role;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-    }
-
-    public User() {
-        super();
-    }
+//    public User(Integer id, String username, String password, String email, String phone, String question, String answer, Integer role, Date createTime, Date updateTime) {
+//        this.id = id;
+//        this.username = username;
+//        this.password = password;
+//        this.email = email;
+//        this.phone = phone;
+//        this.question = question;
+//        this.answer = answer;
+//        this.role = role;
+//        this.createTime = createTime;
+//        this.updateTime = updateTime;
+//    }
+//
+//    public User() {
+//        super();
+//    }
 
     public Integer getId() {
         return id;

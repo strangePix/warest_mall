@@ -46,8 +46,6 @@
         <!-- 最大建立连接等待时间。如果超过此时间将接到异常。设为－1表示无限制 -->
         <property name="maxWait" value="${db.maxWait}"/>
 
-
-
         <!--<property name="defaultAutoCommit" value="${db.defaultAutoCommit}"/>-->
         <!-- 回收被遗弃的（一般是忘了释放的）数据库连接到连接池中 -->
          <!--<property name="removeAbandoned" value="true" />-->
@@ -61,7 +59,7 @@
         <!--# 检查连接是否有效-->
         <property name="testWhileIdle" value="true"/>
         <!--# 检查连接有效性的SQL语句-->
-        <property name="validationQuery" value="SELECT 1 "/>
+        <property name="validationQuery" value="SELECT 1"/>
 
         <property name="testOnBorrow" value="false" />
         <property name="testOnReturn" value="false" />
@@ -75,7 +73,8 @@
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="mapperLocations" value="classpath*:mappers/*Mapper.xml"></property>
-
+        <!--别名设置-->
+        <property name="typeAliasesPackage" value="com.warest.mall.domain"></property>
         <!-- 分页插件 -->
         <property name="plugins">
             <array>

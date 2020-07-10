@@ -6,6 +6,7 @@ import com.warest.mall.domain.User;
 /**
  * Created by geely
  */
+
 public interface IUserService {
 
     ResponseEntity<User> login(String username, String password);

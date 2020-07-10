@@ -7,10 +7,7 @@ import com.warest.mall.domain.User;
 import com.warest.mall.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -18,7 +15,9 @@ import javax.servlet.http.HttpSession;
  * Created by geely
  */
 @Controller
-@RequestMapping("/user/")
+@ResponseBody
+//@RestController   //节省了@ResponseBody
+@RequestMapping("/user")
 public class UserController {
 
 
@@ -35,7 +34,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "login")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<User> login(String username, String password, HttpSession session){
         ResponseEntity<User> response = iUserService.login(username,password);
         if(response.isSuccess()){
@@ -50,11 +49,12 @@ public class UserController {
      * @param session
      * @return
      */
-    @GetMapping(value = "logout")
-    @ResponseBody
+    @PostMapping(value = "logout")
+    //@ResponseBody
     public ResponseEntity<String> logout(HttpSession session){
         session.removeAttribute(Const.CURRENT_USER);
-        return ResponseEntity.createBySuccess();
+        return ResponseEntity.createBySuccessMessage("退出成功");
+        //todo 登出失败的情况  报服务端异常，但暂时没想到失败的情况
     }
 
     /**
@@ -63,7 +63,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "register")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<String> register(User user){
         return iUserService.register(user);
     }
@@ -76,7 +76,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "check_valid")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<String> checkValid(String str, String type){
         return iUserService.checkValid(str,type);
     }
@@ -88,7 +88,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "get_user_info")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<User> getUserInfo(HttpSession session){
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         if(user != null){
@@ -104,7 +104,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "forget_get_question")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<String> forgetGetQuestion(String username){
         return iUserService.selectQuestion(username);
     }
@@ -118,7 +118,7 @@ public class UserController {
      * @return  正确的返回包含一个token，用于修改密码，需要传回
      */
     @PostMapping(value = "forget_check_answer")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<String> forgetCheckAnswer(String username, String question, String answer){
         return iUserService.checkAnswer(username,question,answer);
     }
@@ -132,7 +132,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "forget_reset_password")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<String> forgetRestPassword(String username, String passwordNew, String forgetToken){
         return iUserService.forgetResetPassword(username,passwordNew,forgetToken);
     }
@@ -146,7 +146,7 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "reset_password")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<String> resetPassword(HttpSession session, String passwordOld, String passwordNew){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
@@ -158,24 +158,31 @@ public class UserController {
 
     /**
      * 登录状态更新个人信息
+     * username不能修改，email也不能修改为已存在的地址
      * @param session
      * @param user
      * @return
      */
     @PostMapping(value = "update_information")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<User> update_information(HttpSession session, User user){
         User currentUser = (User)session.getAttribute(Const.CURRENT_USER);
         if(currentUser == null){
             return ResponseEntity.createByErrorMessage("用户未登录");
         }
+        String username = currentUser.getUsername();
+        Integer role = currentUser.getRole();
         user.setId(currentUser.getId());
-        user.setUsername(currentUser.getUsername());
+        user.setUsername(username);
         ResponseEntity<User> response = iUserService.updateInformation(user);
-        if(response.isSuccess()){
-            response.getData().setUsername(currentUser.getUsername());
-            session.setAttribute(Const.CURRENT_USER,response.getData());
+        if(response.isSuccess() && response.getData()!=null){
+            currentUser = response.getData();
+            currentUser.setUsername(username);
+            currentUser.setRole(role);
+            session.setAttribute(Const.CURRENT_USER,currentUser);
+            return ResponseEntity.createBySuccessMessage(response.getMsg());
         }
+        //todo response.getData()为空但成功的情况没有处理
         return response;
     }
 
@@ -185,11 +192,11 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "get_information")
-    @ResponseBody
+    //@ResponseBody
     public ResponseEntity<User> get_information(HttpSession session){
         User currentUser = (User)session.getAttribute(Const.CURRENT_USER);
         if(currentUser == null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
+            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"未登录,无法获取当前用户信息,需要强制登录,status=10");
         }
         return iUserService.getInformation(currentUser.getId());
     }

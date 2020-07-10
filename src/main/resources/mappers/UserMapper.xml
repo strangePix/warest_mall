@@ -18,7 +18,7 @@
   <sql id="Base_Column_List" >
     id, username, password, email, phone, question, answer, role, create_time, update_time
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+  <select id="selectByPrimaryKey" resultType="com.warest.mall.domain.User" parameterType="java.lang.Integer" >
     select
     <include refid="Base_Column_List" />
     from mmall_user
@@ -139,7 +139,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.warest.mall.domain.User" >
+  <update id="updateByPrimaryKey" parameterType="user" >
     update mmall_user
     set username = #{username,jdbcType=VARCHAR},
       password = #{password,jdbcType=VARCHAR},
@@ -162,9 +162,9 @@
     select count(id) from mmall_user
     where email = #{email}
   </select>
-  <select id="selectLogin" resultMap="BaseResultMap" >
+  <select id="selectLogin" resultType="user" >
     select
-      <include refid="Base_Column_List" />
+      id, username, email, phone, question,role
     from mmall_user
     where username=#{username} and password=#{password}
   </select>
@@ -204,6 +204,13 @@
     select count(id) from mmall_user
     where email = #{email}
     and id != #{userId}
+  </select>
+
+  <select id="getInformationBySession" parameterType="int" resultType="user">
+    select
+    id, username, email, phone, question,role
+    from mmall_user
+    where id != #{userId}
   </select>
 
 </mapper>

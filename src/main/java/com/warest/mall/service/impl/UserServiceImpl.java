@@ -10,6 +10,7 @@ import com.warest.mall.util.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
  * Created by geely
  */
 @Service("iUserService")
+//@Transactional
 public class UserServiceImpl implements IUserService {
 
     @Autowired
@@ -36,7 +38,7 @@ public class UserServiceImpl implements IUserService {
             return ResponseEntity.createByErrorMessage("密码错误");
         }
         //上述情况没返回，说明登录成功，隐藏密码
-        user.setPassword(StringUtils.EMPTY);
+        //user.setPassword(StringUtils.EMPTY);
         return ResponseEntity.createBySuccess("登录成功",user);
     }
 
@@ -154,7 +156,7 @@ public class UserServiceImpl implements IUserService {
         //从服务器取出账号token，如果当初没设就没有，或者过期
         String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
         if(StringUtils.isBlank(token)){
-            return ResponseEntity.createByErrorMessage("修改密码操作失效：token不存在或已失效");
+            return ResponseEntity.createByErrorMessage("修改密码操作失效：token不存在/过期");
         }
         //判断token与提供的是否一致，一致则重设密码
         if(StringUtils.equals(forgetToken,token)){
@@ -165,17 +167,18 @@ public class UserServiceImpl implements IUserService {
                 return ResponseEntity.createBySuccessMessage("修改密码成功");
             }
         }else{
-            return ResponseEntity.createByErrorMessage("修改密码操作失效：token无效");
+            return ResponseEntity.createByErrorMessage("修改密码操作失效：token无效/过期");
         }
         return ResponseEntity.createByErrorMessage("修改密码操作失效");
     }
 
 
     public ResponseEntity<String> resetPassword(String passwordOld, String passwordNew, User user){
-        //防止横向越权,要校验一下这个用户的旧密码,一定要指定是这个用户.因为我们会查询一个count(1),如果不指定id,那么结果就是true啦count>0;
+        //防止横向越权,要校验一下这个用户的旧密码,一定要指定是这个用户.
+        // 因为我们会查询一个count(1),如果不指定id,那么结果就是true啦count>0;
         int resultCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld),user.getId());
         if(resultCount == 0){
-            return ResponseEntity.createByErrorMessage("旧密码错误");
+            return ResponseEntity.createByErrorMessage("密码更新失败：原密码错误");
         }
 
         user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
@@ -189,11 +192,14 @@ public class UserServiceImpl implements IUserService {
 
     public ResponseEntity<User> updateInformation(User user){
         //username是不能被更新的
-        //email也要进行一个校验,校验新的email是不是已经存在,并且存在的email如果相同的话,不能是我们当前的这个用户的.
+        //email也要进行一个校验,校验新的email是不是已经存在,
+        //这里的查询语句是  email不存在或者email已存在但就是这个用户的时候才会返回0
         int resultCount = userMapper.checkEmailByUserId(user.getEmail(),user.getId());
         if(resultCount > 0){
+            //这种情况是email没变
             return ResponseEntity.createByErrorMessage("email已存在,请更换email再尝试更新");
         }
+        //更新用户时  不包括用户名和密码
         User updateUser = new User();
         updateUser.setId(user.getId());
         updateUser.setEmail(user.getEmail());
@@ -203,6 +209,7 @@ public class UserServiceImpl implements IUserService {
 
         int updateCount = userMapper.updateByPrimaryKeySelective(updateUser);
         if(updateCount > 0){
+            updateUser.setAnswer(null);
             return ResponseEntity.createBySuccess("更新个人信息成功",updateUser);
         }
         return ResponseEntity.createByErrorMessage("更新个人信息失败");
@@ -211,11 +218,12 @@ public class UserServiceImpl implements IUserService {
 
 
     public ResponseEntity<User> getInformation(Integer userId){
-        User user = userMapper.selectByPrimaryKey(userId);
+//        User user = userMapper.selectByPrimaryKey(userId);
+        User user = userMapper.getInformationBySession(userId);
         if(user == null){
             return ResponseEntity.createByErrorMessage("找不到当前用户");
         }
-        user.setPassword(org.apache.commons.lang3.StringUtils.EMPTY);
+        //user.setPassword(StringUtils.EMPTY);
         return ResponseEntity.createBySuccess(user);
 
     }

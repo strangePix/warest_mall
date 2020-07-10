@@ -47,7 +47,8 @@ public class MD5Util {
     }
 
     public static String MD5EncodeUtf8(String origin) {
-        origin = origin + PropertiesUtil.getProperty("password.salt", "");
+        //设置了默认值  如果没有设置盐值的话
+        origin = origin + PropertiesUtil.getProperty("password.salt", "strangepix");
         return MD5Encode(origin, "utf-8");
     }
 
