@@ -5,11 +5,9 @@ import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.User;
 import com.warest.mall.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
@@ -17,7 +15,7 @@ import javax.servlet.http.HttpSession;
  * Created by geely
  */
 
-@Controller
+@RestController
 @RequestMapping("/manage/user")
 public class UserManageController {
 
@@ -25,7 +23,7 @@ public class UserManageController {
     private IUserService iUserService;
 
     @PostMapping(value="login")
-    @ResponseBody
+    // @ResponseBody
     public ResponseEntity<User> login(String username, String password, HttpSession session){
         ResponseEntity<User> response = iUserService.login(username,password);
         if(response.isSuccess()){

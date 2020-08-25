@@ -9,7 +9,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 //@TransactionConfiguration(transactionManager = "transactionManager")
 @Rollback
-@ContextConfiguration(locations={"classpath:springMVC.xml"})
+@ContextConfiguration(locations={"classpath:spring-mvc.xml"})
 public abstract class TestBase {
 //public abstract class TestBase extends AbstractTransactionalJUnit4SpringContextTests {
 

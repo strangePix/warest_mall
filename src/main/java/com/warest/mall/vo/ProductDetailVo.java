@@ -1,27 +1,44 @@
 package com.warest.mall.vo;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
- * Created by geely
+ * 产品vo
  */
+// @Component
 public class ProductDetailVo {
 
-    private Integer  id;
+    private Integer id;
     private Integer categoryId;
     private String name;
+    // 副标题
     private String subtitle;
+    //主图
     private String mainImage;
+    // 子图
     private String subImages;
+    // 详情描述
     private String detail;
+    // 价格
     private BigDecimal price;
+    // 库存
     private Integer stock;
+    // 状态
     private Integer status;
-    private String createTime;
-    private String updateTime;
 
+    // 时间戳？
+    // private String createTime;
+    // private String updateTime;
+    private Date createTime;
+    private Date updateTime;
 
+    // 图片服务器url与图片文件名拼接为完整的
+    @Value("${ftp.server.http.prefix:http://img.happymmall.com/}")
     private String imageHost;
+    // 父分类id
     private Integer parentCategoryId;
 
     public Integer getId() {
@@ -104,19 +121,19 @@ public class ProductDetailVo {
         this.status = status;
     }
 
-    public String getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
-    public String getUpdateTime() {
+    public Date getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(String updateTime) {
+    public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
 

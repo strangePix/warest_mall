@@ -139,7 +139,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="user" >
+  <update id="updateByPrimaryKey" parameterType="com.warest.mall.domain.User" >
     update mmall_user
     set username = #{username,jdbcType=VARCHAR},
       password = #{password,jdbcType=VARCHAR},
@@ -162,7 +162,7 @@
     select count(id) from mmall_user
     where email = #{email}
   </select>
-  <select id="selectLogin" resultType="user" >
+  <select id="selectLogin" resultType="com.warest.mall.domain.User" >
     select
       id, username, email, phone, question,role
     from mmall_user
@@ -206,11 +206,11 @@
     and id != #{userId}
   </select>
 
-  <select id="getInformationBySession" parameterType="int" resultType="user">
+  <select id="getInformationBySession" parameterType="int" resultType="com.warest.mall.domain.User">
     select
-    id, username, email, phone, question,role
+    id, username, email, phone, question, role
     from mmall_user
-    where id != #{userId}
+    where id = #{userId}
   </select>
 
 </mapper>

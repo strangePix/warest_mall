@@ -6,17 +6,14 @@ import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.User;
 import com.warest.mall.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
-/**
- * Created by geely
- */
-@Controller
-@ResponseBody
-//@RestController   //节省了@ResponseBody
+
+@RestController   //节省了@ResponseBody和@Controller
 @RequestMapping("/user")
 public class UserController {
 
@@ -34,7 +31,6 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "login")
-    //@ResponseBody
     public ResponseEntity<User> login(String username, String password, HttpSession session){
         ResponseEntity<User> response = iUserService.login(username,password);
         if(response.isSuccess()){
@@ -50,7 +46,6 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "logout")
-    //@ResponseBody
     public ResponseEntity<String> logout(HttpSession session){
         session.removeAttribute(Const.CURRENT_USER);
         return ResponseEntity.createBySuccessMessage("退出成功");
@@ -63,7 +58,6 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "register")
-    //@ResponseBody
     public ResponseEntity<String> register(User user){
         return iUserService.register(user);
     }
@@ -76,7 +70,6 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "check_valid")
-    //@ResponseBody
     public ResponseEntity<String> checkValid(String str, String type){
         return iUserService.checkValid(str,type);
     }
@@ -88,7 +81,6 @@ public class UserController {
      * @return
      */
     @PostMapping(value = "get_user_info")
-    //@ResponseBody
     public ResponseEntity<User> getUserInfo(HttpSession session){
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         if(user != null){

@@ -181,11 +181,10 @@
     SELECT
     <include refid="Base_Column_List"/>
     from mmall_product
-    ORDER BY id asc
   </select>
 
 
-  <select id="selectByNameAndProductId" resultMap="BaseResultMap" >
+  <select id="selectByNameAndProductId" resultType="com.warest.mall.domain.Product" >
     SELECT
     <include refid="Base_Column_List"/>
     from mmall_product
@@ -199,7 +198,7 @@
     </where>
   </select>
 
-  <select id="selectByNameAndCategoryIds" resultMap="BaseResultMap" >
+  <select id="selectByNameAndCategoryIds" resultType="com.warest.mall.domain.Product" >
     SELECT
     <include refid="Base_Column_List"></include>
     from mmall_product

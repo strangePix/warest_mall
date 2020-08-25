@@ -140,7 +140,7 @@ public class OrderController {
             }
             params.put(name,valueStr);
         }
-        logger.info("支付宝回调,sign:{},trade_status:{},参数:{}",params.get("sign"),params.get("trade_status"),params.toString());
+        //todo logger.info("支付宝回调,sign:{},trade_status:{},参数:{}",params.get("sign"),params.get("trade_status"),params.toString());
 
         //非常重要,验证回调的正确性,是不是支付宝发的.并且呢还要避免重复通知.
 

@@ -11,11 +11,15 @@ import java.util.Properties;
 /**
  * Created by geely
  */
+
+
 public class PropertiesUtil {
 
     private static Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
     private static Properties props;
+
+
 
     static {
         String fileName = "warest.properties";

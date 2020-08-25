@@ -32,7 +32,9 @@ public class Const {
     }
 
     public enum ProductStatusEnum{
-        ON_SALE(1,"在线");
+        ON_SALE(1,"在售"),
+        OFF_SHELF(2,"下架"),
+        DELETED(3,"删除");
         private String value;
         private int code;
         ProductStatusEnum(int code,String value){

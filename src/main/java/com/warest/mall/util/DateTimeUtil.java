@@ -8,7 +8,8 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
- * Created by geely
+ * 时间转换类  str与date互相转换
+ * 采用工具类joda-time  线程安全的日期时间工具类
  */
 public class DateTimeUtil {
 
@@ -17,7 +18,6 @@ public class DateTimeUtil {
     //str->Date
     //Date->str
     public static final String STANDARD_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
 
 
     public static Date strToDate(String dateTimeStr,String formatStr){

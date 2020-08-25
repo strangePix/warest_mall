@@ -1,10 +1,13 @@
 package com.warest.mall.vo;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.math.BigDecimal;
 
 /**
  * Created by geely
  */
+// @Component
 public class ProductListVo {
 
     private Integer id;
@@ -17,6 +20,7 @@ public class ProductListVo {
 
     private Integer status;
 
+    @Value("${ftp.server.http.prefix:http://img.happymmall.com/}")
     private String imageHost;
 
     public Integer getId() {

@@ -1,5 +1,7 @@
 package com.warest.mall.domain;
 
+import com.google.common.base.Objects;
+
 import java.util.Date;
 
 public class Category {
@@ -25,6 +27,21 @@ public class Category {
         this.sortOrder = sortOrder;
         this.createTime = createTime;
         this.updateTime = updateTime;
+    }
+
+    // 为了排重，重写equal和hashcode方法
+    //equal的判断依据只需要id
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Category category = (Category) o;
+        return Objects.equal(id, category.id);
+    }
+    //判断是否equal用到hashcode所以需要重写
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public Category() {
