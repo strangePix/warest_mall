@@ -143,11 +143,11 @@ public class FTPUtil {
         dir = new String(dir.getBytes("GBK"), "iso-8859-1");  //不这么设也行，不过设了之后速度很快
         boolean flag = true;
         try {
-            logger.info("{}",ftpClient.listFiles("/img").length);
+            /*logger.info("{}",ftpClient.listFiles("/img").length);
             logger.info("{}",ftpClient.listFiles("img").length);
-            logger.info("{}",ftpClient.listFiles("\\img").length);
+            logger.info("{}",ftpClient.listFiles("\\img").length);*/
             flag = ftpClient.makeDirectory(dir);
-            logger.info("创建目录{}结果：{}", dir,flag);
+            logger.info("创建de目录{}结果：{}", dir,flag);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("创建上传目录{}失败",dir);
