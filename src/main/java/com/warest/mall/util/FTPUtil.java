@@ -88,6 +88,9 @@ public class FTPUtil {
         //FileInputStream fis = null;
         //连接FTP服务器
         if (connectServer()) {
+            //因为ftp设置了被动模式，开放服务端口范围 这里打开本地被动模式
+            ftpClient.enterLocalPassiveMode();
+            //todo 处理路径  将\\之类转换为/
             try {
                 //切换文件夹
                 if (!existFile(remotePath)) {
@@ -103,7 +106,7 @@ public class FTPUtil {
                 // 上传文件类型  二进制
                 ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
                 // 因为ftp设置了被动模式，开放服务端口范围 这里打开本地被动模式
-                ftpClient.enterLocalPassiveMode();
+                //ftpClient.enterLocalPassiveMode();
 
                 // testFile();
 
@@ -135,8 +138,7 @@ public class FTPUtil {
     private boolean existFile(String path) throws IOException {
         // System.out.println("img文件列表显示：");
         FTPFile[] ftpFileArr = ftpClient.listFiles(path);
-        FTPFile[] a1 = ftpClient.listFiles("/");
-        logger.info("a:{}", new Object[]{a1.length});
+        //放在服务器查询为0  原因未知   /也为0   但本地可运行
         return ftpFileArr.length > 0;
     }
 
@@ -147,7 +149,7 @@ public class FTPUtil {
         boolean flag = true;
         try {
             flag = ftpClient.makeDirectory(dir);
-
+             //如果文件夹已存在  创建会异常
             logger.info("创建目录{}结果：{}", dir, flag);
         } catch (Exception e) {
             e.printStackTrace();
