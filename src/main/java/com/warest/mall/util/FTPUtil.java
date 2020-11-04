@@ -93,7 +93,7 @@ public class FTPUtil {
                 if (!existFile(remotePath)) {
                     if (!makeDirectory(remotePath)) return false;
                 }
-                ;
+
                 boolean change = ftpClient.changeWorkingDirectory(remotePath);
                 // logger.info("切换目录结果：{}", change);
                 //设置缓冲区
@@ -135,6 +135,10 @@ public class FTPUtil {
     private boolean existFile(String path) throws IOException {
         // System.out.println("img文件列表显示：");
         FTPFile[] ftpFileArr = ftpClient.listFiles(path);
+        FTPFile[] a1 = ftpClient.listFiles("/img");
+        FTPFile[] a2 = ftpClient.listFiles("img");
+        FTPFile[] a3 = ftpClient.listFiles("\\img");
+        logger.info("a:{}.b:{},c:{}", new Object[]{a1.length,a2.length,a3.length});
         return ftpFileArr.length > 0;
     }
 
@@ -145,10 +149,7 @@ public class FTPUtil {
         boolean flag = true;
         try {
             flag = ftpClient.makeDirectory(dir);
-            FTPFile[] a1 = ftpClient.listFiles("/img");
-            FTPFile[] a2 = ftpClient.listFiles("img");
-            FTPFile[] a3 = ftpClient.listFiles("\\img");
-            logger.info("a:{}.b:{},c:{}", new Object[]{a1.length,a2.length,a3.length});
+
             logger.info("创建目录{}结果：{}", dir, flag);
         } catch (Exception e) {
             e.printStackTrace();
