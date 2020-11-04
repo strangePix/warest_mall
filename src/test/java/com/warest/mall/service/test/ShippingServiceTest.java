@@ -5,13 +5,15 @@ import com.warest.mall.common.ResponseEntity;
 import com.warest.mall.domain.Shipping;
 import com.warest.mall.service.impl.ShippingServiceImpl;
 import com.warest.mall.test.TestBase;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+
+//import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Created by geely

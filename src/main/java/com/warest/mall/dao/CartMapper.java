@@ -19,7 +19,9 @@ public interface CartMapper {
 
     int updateByPrimaryKey(Cart record);
 
+    //两个同类型参数需要注解区分
     Cart selectCartByUserIdProductId(@Param("userId") Integer userId, @Param("productId") Integer productId);
+    // Cart selectCartByUserIdProductId(Integer userId, Integer productId);
 
     List<Cart> selectCartByUserId(Integer userId);
 
@@ -30,9 +32,14 @@ public interface CartMapper {
 
     int checkedOrUncheckedProduct(@Param("userId") Integer userId, @Param("productId") Integer productId, @Param("checked") Integer checked);
 
-    int selectCartProductCount(@Param("userId") Integer userId);
+    int selectCartProductCount(Integer userId);
 
 
+    /**
+     * 根据用户id查询勾选的购物车信息
+     * @param userId
+     * @return
+     */
     List<Cart> selectCheckedCartByUserId(Integer userId);
 
 

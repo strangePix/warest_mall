@@ -85,11 +85,13 @@ public class Const {
             throw new RuntimeException("么有找到对应的枚举");
         }
     }
+    // 支付宝交易相关码
     public interface  AlipayCallback{
-        String TRADE_STATUS_WAIT_BUYER_PAY = "WAIT_BUYER_PAY";
-        String TRADE_STATUS_TRADE_SUCCESS = "TRADE_SUCCESS";
+        String TRADE_STATUS_WAIT_BUYER_PAY = "WAIT_BUYER_PAY";  //交易创建 待付款
+        String TRADE_STATUS_TRADE_SUCCESS = "TRADE_SUCCESS";  //交易支付成功
 
-        String RESPONSE_SUCCESS = "success";
+        //异步接口响应
+        String RESPONSE_SUCCESS = "success";  //验签成功  不重试
         String RESPONSE_FAILED = "failed";
     }
 

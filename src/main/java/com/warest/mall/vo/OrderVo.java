@@ -1,5 +1,7 @@
 package com.warest.mall.vo;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -35,6 +37,7 @@ public class OrderVo {
     //订单的明细
     private List<OrderItemVo> orderItemVoList;
 
+    @Value("${ftp.server.http.prefix:http://img.happymmall.com/}")
     private String imageHost;
     private Integer shippingId;
     private String receiverName;

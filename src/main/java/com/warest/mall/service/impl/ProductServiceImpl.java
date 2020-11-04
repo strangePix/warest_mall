@@ -120,6 +120,16 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
+     * 查询商品状态
+     * @param productId
+     * @return
+     */
+    protected Integer getProductStatus(Integer productId){
+        if(productId == null)return null;
+        return productMapper.getProductStatus(productId);
+    }
+
+    /**
      * 获取商品详情  前台版
      * 区别是查询出的产品信息会判断在售状态，查到但是下架状态也会返回不同结果
      * 产品状态作为枚举声明在Const类中

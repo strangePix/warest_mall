@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by geely
+ * 收货地址管理
  */
 @Service("iShippingService")
 public class ShippingServiceImpl implements IShippingService {
@@ -25,6 +25,7 @@ public class ShippingServiceImpl implements IShippingService {
 
     public ResponseEntity add(Integer userId, Shipping shipping){
         shipping.setUserId(userId);
+        //需要及时获取生成的主键id  在xml配置修改
         int rowCount = shippingMapper.insert(shipping);
         if(rowCount > 0){
             Map result = Maps.newHashMap();
@@ -57,10 +58,16 @@ public class ShippingServiceImpl implements IShippingService {
         if(shipping == null){
             return ResponseEntity.createByErrorMessage("无法查询到该地址");
         }
-        return ResponseEntity.createBySuccess("更新地址成功",shipping);
+        return ResponseEntity.createBySuccess(shipping);
     }
 
-
+    /**
+     * 分页查询
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public ResponseEntity<PageInfo> list(Integer userId, int pageNum, int pageSize){
         PageHelper.startPage(pageNum,pageSize);
         List<Shipping> shippingList = shippingMapper.selectByUserId(userId);

@@ -7,119 +7,134 @@ import com.warest.mall.domain.User;
 import com.warest.mall.service.ICartService;
 import com.warest.mall.vo.CartVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
 /**
- * Created by geely
+ * 加入购物车
  */
-@Controller
-@RequestMapping("/cart/")
+@RestController
+@RequestMapping("/cart")
 public class CartController {
 
     @Autowired
     private ICartService iCartService;
 
+    //todo  登录拦截器
+    private Integer checkLoginId(HttpSession session) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        return user==null?null:user.getId();
+    }
 
-
-    @RequestMapping("list.do")
-    @ResponseBody
+    // 查询购物车
+    @PostMapping("list")
     public ResponseEntity<CartVo> list(HttpSession session){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.list(user.getId());
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.list(userId);
     }
 
-    @RequestMapping("add.do")
-    @ResponseBody
+    /**
+     * 加入购物车
+     * @param session
+     * @param count
+     * @param productId
+     * @return
+     */
+    @PostMapping("add")
     public ResponseEntity<CartVo> add(HttpSession session, Integer count, Integer productId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.add(user.getId(),productId,count);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.add(userId,productId,count);
     }
 
 
-
-    @RequestMapping("update.do")
-    @ResponseBody
+    /**
+     * 修改购物车商品数量
+     * 没有的商品不会添加
+     * @param session
+     * @param count
+     * @param productId
+     * @return
+     */
+    @PostMapping("update")
     public ResponseEntity<CartVo> update(HttpSession session, Integer count, Integer productId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.update(user.getId(),productId,count);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.update(userId,productId,count);
     }
 
-    @RequestMapping("delete_product.do")
-    @ResponseBody
+    /**
+     * 删除商品
+     * @param session
+     * @param productIds
+     * @return
+     */
+    @PostMapping("delete_product")
     public ResponseEntity<CartVo> deleteProduct(HttpSession session, String productIds){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.deleteProduct(user.getId(),productIds);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.deleteProduct(userId,productIds);
     }
 
 
-    @RequestMapping("select_all.do")
-    @ResponseBody
+    /**
+     * 全选
+     * @param session
+     * @return
+     */
+    @PostMapping("select_all")
     public ResponseEntity<CartVo> selectAll(HttpSession session){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.selectOrUnSelect(user.getId(),null,Const.Cart.CHECKED);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.selectOrUnSelect(userId,null,Const.Cart.CHECKED);
     }
 
-    @RequestMapping("un_select_all.do")
-    @ResponseBody
+    /**
+     * 全反选
+     * @param session
+     * @return
+     */
+    @PostMapping("un_select_all")
     public ResponseEntity<CartVo> unSelectAll(HttpSession session){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.selectOrUnSelect(user.getId(),null,Const.Cart.UN_CHECKED);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.selectOrUnSelect(userId,null,Const.Cart.UN_CHECKED);
     }
 
 
-
-    @RequestMapping("select.do")
-    @ResponseBody
+    /**
+     * 单选
+     * @param session
+     * @param productId 根据的是商品id而不是购物车商品id
+     * @return
+     */
+    @PostMapping("select")
     public ResponseEntity<CartVo> select(HttpSession session, Integer productId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.selectOrUnSelect(user.getId(),productId,Const.Cart.CHECKED);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.selectOrUnSelect(userId,productId,Const.Cart.CHECKED);
     }
 
-    @RequestMapping("un_select.do")
-    @ResponseBody
+    /**
+     * 单选反选
+     * @param session
+     * @param productId
+     * @return
+     */
+    @PostMapping("un_select")
     public ResponseEntity<CartVo> unSelect(HttpSession session, Integer productId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iCartService.selectOrUnSelect(user.getId(),productId,Const.Cart.UN_CHECKED);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()):iCartService.selectOrUnSelect(userId,productId,Const.Cart.UN_CHECKED);
     }
 
 
-
-    @RequestMapping("get_cart_product_count.do")
-    @ResponseBody
+    /**
+     * 查询购物车不同规格商品数，数量之和
+     * @param session
+     * @return
+     */
+    @PostMapping("get_cart_product_count")
     public ResponseEntity<Integer> getCartProductCount(HttpSession session){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createBySuccess(0);
-        }
-        return iCartService.getCartProductCount(user.getId());
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createBySuccess(0):iCartService.getCartProductCount(userId);
+
     }
 
 

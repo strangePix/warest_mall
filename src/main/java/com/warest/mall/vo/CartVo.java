@@ -1,16 +1,23 @@
 package com.warest.mall.vo;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Created by geely
+ * 购物车vo
  */
 public class CartVo {
 
+    // 购物车商品集合
     private List<CartProductVo> cartProductVoList;
+    //总价
     private BigDecimal cartTotalPrice;
-    private Boolean allChecked;//是否已经都勾选
+    //全选
+    private Boolean allChecked;
+    //购物车图片
+    @Value("${ftp.server.http.prefix:http://img.happymmall.com/}")
     private String imageHost;
 
     public List<CartProductVo> getCartProductVoList() {

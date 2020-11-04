@@ -3,7 +3,7 @@ package com.warest.mall.vo;
 import java.math.BigDecimal;
 
 /**
- * Created by geely
+ * 购物车商品vo
  */
 public class CartProductVo {
 
@@ -22,7 +22,8 @@ public class CartProductVo {
     private Integer productStock;
     private Integer productChecked;//此商品是否勾选
 
-    private String limitQuantity;//限制数量的一个返回结果
+    //是否限制商品数量
+    private String limitQuantity;
 
     public Integer getId() {
         return id;

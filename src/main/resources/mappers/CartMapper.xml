@@ -118,7 +118,7 @@
   </update>
 
 
-  <select id="selectCartByUserIdProductId" resultMap="BaseResultMap" >
+  <select id="selectCartByUserIdProductId" resultType="com.warest.mall.domain.Cart" >
     SELECT
     <include refid="Base_Column_List"/>
     from mmall_cart
@@ -128,7 +128,7 @@
 
 
 
-  <select id="selectCartByUserId" resultMap="BaseResultMap" parameterType="int">
+  <select id="selectCartByUserId" resultType="com.warest.mall.domain.Cart" parameterType="int">
     SELECT
     <include refid="Base_Column_List"/>
     from mmall_cart
@@ -170,7 +170,7 @@
 
 
 
-  <select id="selectCheckedCartByUserId" parameterType="int" resultMap="BaseResultMap">
+  <select id="selectCheckedCartByUserId" parameterType="int" resultType="com.warest.mall.domain.Cart">
     SELECT
     <include refid="Base_Column_List"/>
     from mmall_cart

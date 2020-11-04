@@ -9,10 +9,10 @@ import com.warest.mall.service.IOrderService;
 import com.warest.mall.service.IUserService;
 import com.warest.mall.vo.OrderVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpSession;
  * Created by geely
  */
 
-@Controller
+@RestController
 @RequestMapping("/manage/order")
 public class OrderManageController {
 
@@ -29,8 +29,7 @@ public class OrderManageController {
     @Autowired
     private IOrderService iOrderService;
 
-    @RequestMapping("list.do")
-    @ResponseBody
+    @PostMapping("list")
     public ResponseEntity<PageInfo> orderList(HttpSession session, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                               @RequestParam(value = "pageSize",defaultValue = "10")int pageSize){
 
@@ -47,8 +46,7 @@ public class OrderManageController {
         }
     }
 
-    @RequestMapping("detail.do")
-    @ResponseBody
+    @PostMapping("detail")
     public ResponseEntity<OrderVo> orderDetail(HttpSession session, Long orderNo){
 
         User user = (User)session.getAttribute(Const.CURRENT_USER);
@@ -67,8 +65,7 @@ public class OrderManageController {
 
 
 
-    @RequestMapping("search.do")
-    @ResponseBody
+    @PostMapping("search")
     public ResponseEntity<PageInfo> orderSearch(HttpSession session, Long orderNo, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                                 @RequestParam(value = "pageSize",defaultValue = "10")int pageSize){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
@@ -86,8 +83,7 @@ public class OrderManageController {
 
 
 
-    @RequestMapping("send_goods.do")
-    @ResponseBody
+    @PostMapping("send_goods")
     public ResponseEntity<String> orderSendGoods(HttpSession session, Long orderNo){
 
         User user = (User)session.getAttribute(Const.CURRENT_USER);

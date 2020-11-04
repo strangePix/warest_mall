@@ -31,7 +31,8 @@
     delete from mmall_shipping
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.warest.mall.domain.Shipping" >
+  <!--配置useGeneratedKeys和keyProperty，让自动生成的主键注入-->
+  <insert id="insert" parameterType="com.warest.mall.domain.Shipping" useGeneratedKeys="true" keyProperty="id" >
     insert into mmall_shipping (id, user_id, receiver_name,
       receiver_phone, receiver_mobile, receiver_province,
       receiver_city, receiver_district, receiver_address,

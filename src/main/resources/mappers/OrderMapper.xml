@@ -201,7 +201,7 @@
 
 
 
-  <select id="selectByUserIdAndOrderNo" resultMap="BaseResultMap" >
+  <select id="selectByUserIdAndOrderNo" resultType="com.warest.mall.domain.Order" >
     SELECT
     <include refid="Base_Column_List"></include>
     from mmall_order
@@ -210,7 +210,7 @@
   </select>
 
 
-  <select id="selectByOrderNo" resultMap="BaseResultMap" parameterType="long">
+  <select id="selectByOrderNo" resultType="com.warest.mall.domain.Order" parameterType="long">
     SELECT
     <include refid="Base_Column_List">
     </include>

@@ -8,19 +8,16 @@ import com.warest.mall.domain.Shipping;
 import com.warest.mall.domain.User;
 import com.warest.mall.service.IShippingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.HttpSession;
 
 /**
- * Created by geely
+ * 收货地址管理模块
  */
-
-@Controller
-@RequestMapping("/shipping/")
+@RestController
+@RequestMapping("/shipping")
 public class ShippingController {
 
 
@@ -28,59 +25,58 @@ public class ShippingController {
     private IShippingService iShippingService;
 
 
-    @RequestMapping("add.do")
-    @ResponseBody
+    //todo  登录拦截器
+    private Integer checkLoginId(HttpSession session) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        return user==null?null:user.getId();
+    }
+
+    /**
+     * 新增地址
+     * @param session
+     * @param shipping  地址相关数据，对象关联
+     * @return
+     */
+    @PostMapping("add")
     public ResponseEntity add(HttpSession session, Shipping shipping){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iShippingService.add(user.getId(),shipping);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()): iShippingService.add(userId,shipping);
     }
 
 
-    @RequestMapping("del.do")
-    @ResponseBody
+    /**
+     * 删除地址
+     * @param session
+     * @param shippingId  删除id
+     * @return
+     */
+    @PostMapping("delete")
     public ResponseEntity del(HttpSession session, Integer shippingId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iShippingService.del(user.getId(),shippingId);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()): iShippingService.del(userId,shippingId);
     }
 
-    @RequestMapping("update.do")
-    @ResponseBody
+    
+    @PostMapping("update")
     public ResponseEntity update(HttpSession session, Shipping shipping){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iShippingService.update(user.getId(),shipping);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()): iShippingService.update(userId,shipping);
     }
 
 
-    @RequestMapping("select.do")
-    @ResponseBody
+    @PostMapping("select")
     public ResponseEntity<Shipping> select(HttpSession session, Integer shippingId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iShippingService.select(user.getId(),shippingId);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"请登录之后查询"): iShippingService.select(userId,shippingId);
     }
 
 
-    @RequestMapping("list.do")
-    @ResponseBody
+    @PostMapping("list")
     public ResponseEntity<PageInfo> list(@RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                          @RequestParam(value = "pageSize",defaultValue = "10")int pageSize,
                                          HttpSession session){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
-        if(user ==null){
-            return ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
-        }
-        return iShippingService.list(user.getId(),pageNum,pageSize);
+        Integer userId = this.checkLoginId(session);
+        return userId==null?ResponseEntity.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc()): iShippingService.list(userId,pageNum,pageSize);
     }
 
 

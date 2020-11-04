@@ -3,6 +3,9 @@ package com.warest.mall.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * 订单详情
+ */
 public class OrderItem {
     private Integer id;
 
