@@ -6,7 +6,7 @@
 
 ## 2. 服务端架构（淘宝为例）
 
-![image-20200708134222752](D:\mk-project\warest_mall\README.assets\image-20200708134222752.png)
+![1593226386049](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1593226386049.png)
 
 ### 2.1 安全体系
 
@@ -249,6 +249,74 @@ select * from mmall_user\G;
 
 
 
+### 3.4 log4j日志配置
+
+- 引入依赖
+
+  ```xml
+  	<dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.6.6</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>1.6.6</version>
+      </dependency>
+  ```
+  
+- 配置文件 log4j.properties
+
+  ```properties
+  log4j.rootLogger=DEBUG,CONSOLE
+  
+  #暂时只配置控制台日志
+  
+  log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
+  log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
+  log4j.appender.CONSOLE.layout.ConversionPattern=%d{ISO8601} %-6r [%15.15t] %-5p %30.30c %x - %m\n
+  ```
+
+- 如果配合druid数据库进行配置
+
+  ```xml
+  <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+          ...
+          <property name="filters" value="stat, log4j" />
+          <property name="proxyFilters">
+              <list>
+                  <ref bean="log-filter"/>
+              </list>
+          </property>
+  </bean>
+  <bean id="log-filter" class="com.alibaba.druid.filter.logging.Log4jFilter">
+          <property name="resultSetLogEnabled" value="false" />
+          <property name="statementLogEnabled" value="false" />
+          <property name="connectionLogEnabled" value="false" />
+  </bean>
+  ```
+
+  > - 针对控制台日志出现的日志重复打印问题：
+  >
+  >   现象：同一条日志记录打印两行，指resultSet、statement等打印，但关闭日志打印又会一条不出
+  >
+  >   所以进行了配置
+  >
+  >   ```xml
+  >   <property name="resultSetLogEnabled" value="false" />
+  >   <property name="statementLogEnabled" value="false" />
+  >   <property name="connectionLogEnabled" value="false" />
+  >   ```
+  >
+  >   如果没出现这些问题可以不配置这个内容
+
+
 ## 4.数据库相关
 
 ### 4.1 数据表结构
@@ -465,6 +533,108 @@ CREATE TABLE `mmall_shipping` (
 > - 数据字段的冗余用来应对流量
 
 
+
+### 4.3 数据库问题处理
+
+#### 4.3.1 程序运行一段时间后数据库连接花费超出预期的时间，druid报Communications link failure
+
+过程中日志打印skip not validate connection，表明存在数据库连接无效
+
+原因：mysql服务长时间未连接自动断开，应用从数据库获取到的连接是数据库单方面断开的失效连接。
+
+解决方式（平行策略，不关联）：
+
+- 数据库地址添加&autoReconnect=true
+
+  > 据说只对4.x版本有效
+
+- 项目配置timeBetweenEvictionRunsMillis （检查超时连接的检查间隔，配置为60000，即1分钟）
+
+  minEvictableIdleTimeMillis=300000（连接最少存活时长，30分钟）
+
+  maxEvictableIdleTimeMillis=xxx（连接最大存活时长，默认25200000）
+
+  ```xml
+     <!-- #连接的最小超时时间，默认为半小时。 -->
+  <property name="minEvictableIdleTimeMillis" value="300000"/>
+     <!--# 失效检查线程运行时间间隔     配置60000对应1分钟-->
+  <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+  ```
+
+     保证max-min要大于time，且mysql的wait_time也大于time
+  
+     目的是保证连接池检测到超时连接进行回收周期内，连接没有先被mysql断开
+  
+     - 另外一种配置：
+       
+       ```xml
+       <property name="timeBetweenEvictionRunsMillis" value="2000"/>
+       <property name="minEvictableIdleTimeMillis" value="600000"/>
+       <property name="maxEvictableIdleTimeMillis" value="900000"/>
+       <property name="keepAlive" value="true"/>
+       ```
+
+   - 修改数据库闲置连接的超时时间（尽量大），这样也可以避免项目运行时间太长导致数据库连接断开
+  
+     查询数据库的最大超时时间  show global variables like "wait_timeout";   （我这里查的是28800，单位应该是秒）
+  
+     vim /etc/my.cnf
+  
+     配置 （单位是ms）
+  
+     [mysqld]
+     
+  
+   wait_timeout = 172800
+     interactive-timeout = 172800
+  
+     或者直接修改数据库 （重启失效）
+  
+     set global wait_timeout=604800;
+  
+     set global interactive_timeout=604800;
+  
+     （数值需要再次确认）
+  
+   默认是28800，指8小时
+  
+   - 有时候是配置未生效，重启mysql服务试试
+  
+   - 使用druid的时候推荐使用1.1.5版本及以上，因为1.1.5版本修复了一个重大的bug：testWhileIdle在某些情况下会失效。
+  
+   - 开启druid的超时回收机制
+  
+     配置
+  
+     ```xml
+     <!-- 回收被遗弃的   超时的（一般是忘了释放的），空闲的数据库连接到连接池中 -->		
+     <property name="removeAbandoned" value="true" />
+     <!-- 数据库连接过多长时间不用将被视为被遗弃而收回连接池中  单位为s -->
+     <property name="removeAbandonedTimeout" value="1800" />
+     <!--回收时打印日志，正式运行时关闭-->
+     <property name="logAbandoned" value="false" />
+     ```
+  
+     回收未被释放的连接，避免连接池泄露。
+  
+     因为生产环境存在长事务，所以生产环境一般不设置，用于开发阶段定位连接泄露位置。
+  
+   - 配置druid保活
+  
+     ```xml
+   <property name="keepAlive" value="true"/>
+     <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+   <property name="minIdle" value="10"/>
+     ```
+     
+     keepAlive 为 true
+     
+     效果为连接池中的minIdle数量以内的连接，空闲时间超过minEvictableIdleTimeMillis，则会执行keepAlive操作。
+     
+  
+   这个时候把minEvictableIdleTimeMillis设置短一些
+  
+   
 
 ## 5.项目初始化
 
@@ -701,7 +871,7 @@ CREATE TABLE `mmall_shipping` (
   
 - 根据配置生成dao层代码
 
-  ![image-20200707221446382](C:\Users\Administrator\Desktop\md\项目搭建补充.assets\image-20200707221446382.png)
+  ![image-20200707221446382](C:\Users\ALIENWARE\Desktop\md\项目搭建补充.assets\image-20200707221446382.png)
 
   执行插件的generate即可
 
@@ -785,7 +955,7 @@ create_time和update_time交由代码实现更新，减少业务代码复杂度�
 
 - settings-plugins-browse repositories
 
-  ![image-20200708010206897](C:\Users\Administrator\Desktop\md\项目搭建补充.assets\image-20200708010206897.png)
+  ![image-20200708010206897](C:\Users\ALIENWARE\Desktop\md\项目搭建补充.assets\image-20200708010206897.png)
 
 - 搜索mybatis plugin下载安装，重启即可
 
@@ -809,11 +979,499 @@ create_time和update_time交由代码实现更新，减少业务代码复杂度�
 
 - settings-compiler-设置build/make project automatically 设置实时编译
 
-  ![image-20200708131657006](C:\Users\Administrator\Desktop\md\项目搭建补充.assets\image-20200708131657006.png)
+  ![image-20200708131657006](C:\Users\ALIENWARE\Desktop\md\项目搭建补充.assets\image-20200708131657006.png)
 
 - settings-inspections-spring-spring core-code-autowiring for bean class级别从error改为warning
 
-  ![image-20200708133553835](C:\Users\Administrator\Desktop\md\项目搭建补充.assets\image-20200708133553835.png)
+  ![image-20200708133553835](C:\Users\ALIENWARE\Desktop\md\项目搭建补充.assets\image-20200708133553835.png)
 
 > 目的是阻止mapper自动引入时的报错
+
+### 5.10 git提交
+
+```
+git status #检查状态
+git add . #添加
+git commit -am '提交内容'   #提交
+git push #推送
+```
+
+### 5.11 其他问题补充
+
+#### 1.启动问题
+
+- 启动时提示：org.apache.jasper.servlet.TldScanner.scanJars 至少有一个JAR被扫描用于TLD但尚未包含TLD。 为此记录器启用调试日志记录，以获取已扫描但未在其中找到TLD的完整JAR列表。 在扫描期间跳过不需要的JAR可以缩短启动时间和JSP编译时间。
+
+  有jar没被用上，让IDEA控制台提示出项目没用上哪些jar，只需要在tomcat的目录下的conf文件夹内的logging.properties文件里加上一句org.apache.jasper.servlet.TldScanner.level = FINE就可以了
+
+  ![img](https://img2018.cnblogs.com/blog/1756615/201908/1756615-20190813184226982-512898079.png)
+
+  可以看到未被用到的jar包被列了出来,可以根据这个删去没用到的jar
+
+  还有一种方式是在tomcat的目录下的conf文件夹内的catalina.properties中tomcat.util.scan.StandardJarScanFilter.jarsToSkip=改为*.jar，做好备份
+
+- 
+
+  
+
+## 6.用户模块
+
+### 6.1 功能
+
+- 登录
+- 用户名验证
+- 注册
+- 忘记密码
+- 提交问题答案
+- 重置密码
+- 获取用户信息
+- 更新用户信息
+- 退出登录
+
+### 6.2 相关技术/概念
+
+#### 1. 横向越权、纵向越权安全漏洞
+
+横向越权：攻击者访问有相同权限的用户资源
+
+纵向越权：低级别尝试访问高级别资源
+
+> - 横向越权：A用户恶意获取B用户订单详情
+> - 纵向越权：普通用户获取管理员权限
+
+```java
+//已登录情况下重设密码时，需要验证旧密码才能修改，防止通过已登录用户修改其他用户密码
+//验证密码的同时需要确认用户归属
+public ResponseEntity<String> resetPassword(String passwordOld, String passwordNew, User user){
+        //防止横向越权,要校验一下这个用户的旧密码,一定要指定是这个用户.因为我们会查询一个count(1),如果不指定id,那么结果就是true啦count>0;
+        int resultCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld),user.getId());
+        if(resultCount == 0){
+            return ResponseEntity.createByErrorMessage("旧密码错误");
+        }
+        user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
+        int updateCount = userMapper.updateByPrimaryKeySelective(user);
+        if(updateCount > 0){
+            return ResponseEntity.createBySuccessMessage("密码更新成功");
+        }
+        return ResponseEntity.createByErrorMessage("密码更新失败");
+}
+```
+
+#### 2.高复用服务响应对象的设计思想和抽象封装
+
+```java
+@JsonInclude(JsonInclude.Include.NON_NULL)
+//保证序列化json的时候,如果是null的属性不会序列化
+public class ResponseEntity<T> implements Serializable {
+
+//    状态码   1表示失败  0表示成功  get_information有一个10
+    private int status;
+//    状态信息  一般为1时才有
+    private String msg;
+//    数据  一般为0时才有
+    private T data;
+
+    //方便调用，简明通用
+    private ResponseEntity(int status){
+        this.status = status;
+    }
+    //如果泛型为String类型，可能与下一个构造方法冲突，通过公共方法规避
+    private ResponseEntity(int status, T data){
+        this.status = status;
+        this.data = data;
+    }
+    private ResponseEntity(int status, String msg){
+        this.status = status;
+        this.msg = msg;
+    }
+    private ResponseEntity(int status, String msg, T data){
+        this.status = status;
+        this.msg = msg;
+        this.data = data;
+    }
+
+
+    @JsonIgnore
+    //使之不在json序列化结果当中（不会返回给前端）  
+    //判断是否状态成功，用枚举类包含常量
+    public boolean isSuccess(){
+        return this.status == ResponseCode.SUCCESS.getCode();
+    }
+
+    public int getStatus(){
+        return status;
+    }
+    public T getData(){
+        return data;
+    }
+    public String getMsg(){
+        return msg;
+    }
+
+
+    //    静态开放方法
+    //一个成功的响应，不带数据data
+    public static <T> ResponseEntity<T> createBySuccess(){
+        return new ResponseEntity<T>(ResponseCode.SUCCESS.getCode());
+    }
+    //一个成功响应，带消息msg
+    public static <T> ResponseEntity<T> createBySuccessMessage(String msg){
+        return new ResponseEntity<T>(ResponseCode.SUCCESS.getCode(),msg);
+    }
+    //一个成功的响应，带数据，传的是T泛型，只会调用T的构造方法，避免传递String类型数据时与上一个搞混
+    public static <T> ResponseEntity<T> createBySuccess(T data){
+        return new ResponseEntity<T>(ResponseCode.SUCCESS.getCode(),data);
+    }
+    //一个成功响应，带数据和消息
+    public static <T> ResponseEntity<T> createBySuccess(String msg, T data){
+        return new ResponseEntity<T>(ResponseCode.SUCCESS.getCode(),msg,data);
+    }
+
+    //失败响应，自带响应码消息，基本上就是error
+    public static <T> ResponseEntity<T> createByError(){
+        return new ResponseEntity<T>(ResponseCode.ERROR.getCode(),ResponseCode.ERROR.getDesc());
+    }
+
+    //带注明失败消息的失败响应
+    public static <T> ResponseEntity<T> createByErrorMessage(String errorMessage){
+        return new ResponseEntity<T>(ResponseCode.ERROR.getCode(),errorMessage);
+    }
+    //失败响应，响应码自定义
+    public static <T> ResponseEntity<T> createByErrorCodeMessage(int errorCode, String errorMessage){
+        return new ResponseEntity<T>(errorCode,errorMessage);
+    }
+
+
+}
+//枚举类解释常量
+public enum ResponseCode {
+
+    SUCCESS(0,"SUCCESS"),
+    ERROR(1,"ERROR"),
+//    需要登录
+    NEED_LOGIN(10,"NEED_LOGIN"),
+//    参数错误
+    ILLEGAL_ARGUMENT(2,"ILLEGAL_ARGUMENT");
+
+    private final int code;
+    private final String desc;
+
+
+    ResponseCode(int code,String desc){
+        this.code = code;
+        this.desc = desc;
+    }
+
+    public int getCode(){
+        return code;
+    }
+    public String getDesc(){
+        return desc;
+    }
+
+}
+
+```
+
+#### 3.md5加密/加盐
+
+非对称加密，设置工具类MD5Util.java进行调用加密
+
+```java
+import java.security.MessageDigest;
+
+
+public class MD5Util {
+	//内部加密方法
+    private static String byteArrayToHexString(byte b[]) {
+        StringBuffer resultSb = new StringBuffer();
+        for (int i = 0; i < b.length; i++)
+            resultSb.append(byteToHexString(b[i]));
+
+        return resultSb.toString();
+    }
+
+    private static String byteToHexString(byte b) {
+        int n = b;
+        if (n < 0)
+            n += 256;
+        int d1 = n / 16;
+        int d2 = n % 16;
+        return hexDigits[d1] + hexDigits[d2];
+    }
+
+    /**
+     * 返回大写MD5 不对外开放
+     *
+     * @param origin  被加密的字符串
+     * @param charsetname  加密用字符集，为null时使用默认
+     * @return 返回为全部大写
+     */
+    private static String MD5Encode(String origin, String charsetname) {
+        String resultString = null;
+        try {
+            resultString = new String(origin);
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            if (charsetname == null || "".equals(charsetname))
+                resultString = byteArrayToHexString(md.digest(resultString.getBytes()));
+            else
+                resultString = byteArrayToHexString(md.digest(resultString.getBytes(charsetname)));
+        } catch (Exception exception) {
+        }
+        return resultString.toUpperCase();
+    }
+	
+
+
+    private static final String hexDigits[] = {"0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
+
+}
+
+```
+
+```java
+//调用
+//MD5加密
+user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
+//不能解密，验证时将提供的密码用同样方式加密，进行比较
+```
+
+- 加盐加密
+
+  增加机密的复杂度，减少被字典解密的记录
+
+  1. 设置盐值在配置文件
+
+     ```properties
+     #位于mmall.properties
+     password.salt = geelysdafaqj23ou89ZXcj@#$@#$#@KJdjklj;D../dSF.,
+     ```
+
+  2. 加密时取出盐拼接在密码处，再调用md5加密
+
+     ```java
+     //统一，全部使用utf-8字符集加密
+         public static String MD5EncodeUtf8(String origin) {
+             origin = origin + PropertiesUtil.getProperty("password.salt", "");
+             return MD5Encode(origin, "utf-8");
+         }
+     ```
+
+  > 很明显，固定盐值在长期运行中安全性也不能保证，后续改进的话，将在设置密码时随机生成盐值，保存在数据库，用于解密即可。
+
+#### 4.通过内部接口，实现对常量的分组
+
+  - 用途是一个类保存多个同级别的常量，但因为还要保存其他常量，不适合完全分在一起
+
+  - 好处是相较于枚举，不会那么繁重；同时依然保存的是常量
+
+  ```java
+  public class Const{
+      public static final String CURRENT_USER = "currentUser";//普通常量
+      public interface Role{
+          int ROLE_CUSTOMER = 0; //普通用户
+          int ROLE_ADMIN = 0; //管理员
+      }
+  }
+  
+  //调用
+  public class Test{
+      public static void main(){
+          System.out.print(Const.Role.ROLE_CUSTOMER);
+      }
+  }
+  ```
+
+#### 5.工具类TokenCache.java，提供token的存储，加密，有效期设置（Guava缓存使用）
+
+```java
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
+
+public class TokenCache {
+
+//    声明日志
+    private static Logger logger = LoggerFactory.getLogger(TokenCache.class);
+
+    //前缀  命名空间  用于区分
+    public static final String TOKEN_PREFIX = "token_";
+
+    //本地缓存      静态代码块  guava中
+    private static LoadingCache<String,String> localCache =
+            CacheBuilder.newBuilder()
+                    .initialCapacity(1000) //缓存初始化容量
+                    .maximumSize(10000) //缓存最大容量，超过用LRU算法（缓存淘汰）移除缓存项
+                    .expireAfterAccess(12, TimeUnit.HOURS) //有效期 12小时
+                    .build(new CacheLoader<String, String>() { //匿名实现类
+                        //默认的数据加载实现,当调用get取值的时候,如果key没有对应的值,就调用这个方法进行加载.
+                        @Override
+                        public String load(String s) throws Exception {
+                            return "null";  //避免空指针，设定没命中返回特定字符串
+                        }
+                    });
+
+    //存储token
+    public static void setKey(String key,String value){
+        localCache.put(key,value);
+    }
+
+    //获取token
+    public static String getKey(String key){
+        String value = null; //初始化
+        try {
+            value = localCache.get(key);
+            if("null".equals(value)){
+                return null;
+            }
+            return value;
+        }catch (Exception e){
+            logger.error("localCache get error",e);  //打印异常
+      }
+        return null;
+    }
+}
+
+```
+
+生成token、存储、取出的方式
+
+```java
+String forgetToken = UUID.randomUUID().toString();  //生成一个token
+TokenCache.setKey(TokenCache.TOKEN_PREFIX+username,forgetToken);  //本地存储token
+String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX+username); //取出token 过期也会返回null
+```
+
+
+
+### 6.3 接口设计
+
+前台提供11个接口，对应 门户_用户接口
+
+### 6.4 业务补充
+
+- 
+
+### 6.5 补充操作
+
+- 数据库查询避免select * ，会随着数据库的发展查到冗余数据，泄露信息的风险
+
+- 
+
+
+## 7.分类管理模块
+
+### 7.1 功能
+
+- 获取节点
+- 增加节点
+- 修改名字
+- 获取分类id
+- 递归子节点id
+
+### 7.2 相关概念/技术
+
+#### 1.设计封装无限层级树状数据结构
+
+#### 2.递归算法设计思想
+
+#### 3.复杂对象排重处理
+
+#### 4.重写hashcode/equal注意事项
+
+
+
+## 8.商品管理模块
+
+### 8.1 功能
+
+- 加入商品
+- 更新商品数
+- 查询商品数
+- 移除商品
+- 单选/全选/取消
+- 购物车列表
+
+### 8.2 相关概念/技术
+
+#### 1.对接ftp
+
+#### 2.文件上传
+
+#### 3.pagehelper使用细节
+
+- 因为查询语句要交给分页插件扩展，所以mybatis中书写的查询语句结尾不要带分号;
+
+#### 4.文件上传细节
+
+- 因为上传的文件有时候是传到根路径文件夹，要保证文件夹有写入权限（创建者）
+
+#### 5.其他
+
+- 如果用集合装固定数量的元素，然后调用contain方法判断是否包含某关键字，可以选用set集合而非list，时间复杂度是O(1)好过O(n)
+
+## 9.购物车模块
+
+### 9.1 功能
+
+### 9.2 相关概念/技术
+
+- 购物车模块设计思想
+- 高复用购物车核心方法
+- 浮点型商业运算精度丢失问题
+
+1. guava工具类方法分隔字符串为集合
+
+   ```
+   String productIds = “1,2,3,4,5”;
+   List<String> productList = Splitter.on(",").splitToList(productIds);
+   ```
+
+2. 数据库函数IFNULL
+
+   ```
+   数据库函数ifnull可以再查询为null时提供默认值
+   select IFNULL(sum(quantity),0) as count from mmall_cart where user_id = #{userId}
+   用于返回为null时java端无法用基本数据类型（如int）接收，要么改成包装类，要么防止为空
+   ```
+
+## 10.收货地址管理模块
+
+### 10.1  功能
+
+- 添加地址
+- 删除地址
+- 更新地址
+- 地址列表
+- 地址分页
+- 地址详情
+
+### 10.2 相关概念/技术
+
+- springMVC数据绑定
+- mybatis自动生成主键
+- 避免横向越权
+
+## 11.支付模块
+
+蚂蚁沙箱环境
+
+- 同步请求的加签和验证签名
+- 回调验证（签名、金额、订单号...）
+- 过滤重复通知（保证幂等性）
+- 验证确保异步通知来自支付宝
+- 回调请求的返回（响应支付宝的通知）
+
+支付对接技巧：
+
+- 回调的调试方法
+  - 外网远程debug：1.保持远端代码版本与本地一致 2.及时关闭远程debug端口 （不推荐）、
+  - 内网穿透
+
+
 
