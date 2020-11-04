@@ -133,9 +133,9 @@ public class FTPUtil {
     private boolean existFile(String path) throws IOException {
         // System.out.println("img文件列表显示：");
         FTPFile[] ftpFileArr = ftpClient.listFiles(path);
-        for (FTPFile ftpFile : ftpFileArr) {
-            logger.info("文件：{}",ftpFile.getName());
-        }
+        logger.info("{}",ftpClient.listFiles("/img").length);
+        logger.info("{}",ftpClient.listFiles("img").length);
+        logger.info("{}",ftpClient.listFiles("\\img").length);
         return ftpFileArr.length > 0;
     }
 
