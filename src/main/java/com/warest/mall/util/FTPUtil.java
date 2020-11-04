@@ -78,7 +78,7 @@ public class FTPUtil {
         logger.info("开始连接ftp服务器");
         //这个目录斜杠开头表示ftp服务器根目录开始
         boolean result = ftpUtil.uploadFile("/img", fileList);
-        logger.info("结束上传,上传结果:{}",result);
+        logger.info("结束上传,上传结果:{}", result);
         return result;
     }
 
@@ -90,9 +90,10 @@ public class FTPUtil {
         if (connectServer()) {
             try {
                 //切换文件夹
-                if(!existFile(remotePath)){
-                    if(!makeDirectory(remotePath))return false;
-                };
+                if (!existFile(remotePath)) {
+                    if (!makeDirectory(remotePath)) return false;
+                }
+                ;
                 boolean change = ftpClient.changeWorkingDirectory(remotePath);
                 // logger.info("切换目录结果：{}", change);
                 //设置缓冲区
@@ -128,12 +129,12 @@ public class FTPUtil {
 
     /**
      * 测试类
+     *
      * @throws IOException
      */
     private boolean existFile(String path) throws IOException {
         // System.out.println("img文件列表显示：");
         FTPFile[] ftpFileArr = ftpClient.listFiles(path);
-
         return ftpFileArr.length > 0;
     }
 
@@ -143,31 +144,32 @@ public class FTPUtil {
         dir = new String(dir.getBytes("GBK"), "iso-8859-1");  //不这么设也行，不过设了之后速度很快
         boolean flag = true;
         try {
-            /*logger.info("{}",ftpClient.listFiles("/img").length);
-            logger.info("{}",ftpClient.listFiles("img").length);
-            logger.info("{}",ftpClient.listFiles("\\img").length);*/
             flag = ftpClient.makeDirectory(dir);
-            logger.info("创建de目录{}结果：{}", dir,flag);
+            FTPFile[] a1 = ftpClient.listFiles("/img");
+            FTPFile[] a2 = ftpClient.listFiles("img");
+            FTPFile[] a3 = ftpClient.listFiles("\\img");
+            logger.info("a:{}.b:{},c:{}", new Object[]{a1.length,a2.length,a3.length});
+            logger.info("创建目录{}结果：{}", dir, flag);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("创建上传目录{}失败",dir);
+            logger.error("创建上传目录{}失败", dir);
         }
         return flag;
     }
 
-        /**
-         * 连接ftp客户端
-         *
-         * @return
-         */
+    /**
+     * 连接ftp客户端
+     *
+     * @return
+     */
     private boolean connectServer() {
 
         boolean isSuccess = false;
         ftpClient = new FTPClient();
         try {
             ftpClient.setControlEncoding("utf-8");
-            ftpClient.connect(ip,port);
-            isSuccess = ftpClient.login(user, pwd)&& FTPReply.isPositiveCompletion(ftpClient.getReplyCode());
+            ftpClient.connect(ip, port);
+            isSuccess = ftpClient.login(user, pwd) && FTPReply.isPositiveCompletion(ftpClient.getReplyCode());
         } catch (IOException e) {
             logger.error("连接FTP服务器异常", e);
         }
