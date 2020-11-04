@@ -133,9 +133,7 @@ public class FTPUtil {
     private boolean existFile(String path) throws IOException {
         // System.out.println("img文件列表显示：");
         FTPFile[] ftpFileArr = ftpClient.listFiles(path);
-        logger.info("{}",ftpClient.listFiles("/img").length);
-        logger.info("{}",ftpClient.listFiles("img").length);
-        logger.info("{}",ftpClient.listFiles("\\img").length);
+
         return ftpFileArr.length > 0;
     }
 
@@ -145,6 +143,9 @@ public class FTPUtil {
         dir = new String(dir.getBytes("GBK"), "iso-8859-1");  //不这么设也行，不过设了之后速度很快
         boolean flag = true;
         try {
+            logger.info("{}",ftpClient.listFiles("/img").length);
+            logger.info("{}",ftpClient.listFiles("img").length);
+            logger.info("{}",ftpClient.listFiles("\\img").length);
             flag = ftpClient.makeDirectory(dir);
             logger.info("创建目录{}结果：{}", dir,flag);
         } catch (Exception e) {
